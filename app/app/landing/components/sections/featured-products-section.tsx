@@ -4,49 +4,49 @@ import { FadeImage } from "@/components/fade-image";
 
 const features = [
   {
-    title: "Smart Temperature Control",
-    description: "Innovation",
-    image: "/images/d18fe616-5596-4559-90f5-a90f5397d0d8.png",
+    title: "Controlled Minting",
+    description: "Security",
+    image: "/images/blockchain-network.png",
   },
   {
-    title: "Ultra-Light Carbon Frame",
-    description: "Performance",
-    image: "/images/e26fa9c3-966d-4966-94a4-954a1e511c1c.png",
+    title: "Custody Verification",
+    description: "Trust",
+    image: "/images/silver-custody.png",
   },
   {
-    title: "Weather-Resistant Design",
-    description: "Durability",
-    image: "/images/car.jpg",
+    title: "Stellar Integration",
+    description: "Technology",
+    image: "/images/hero-main-silver.png",
   },
   {
-    title: "Integrated GPS Tracking",
-    description: "Navigation",
-    image: "/images/204cee22-9e85-49e8-9303-1d309af626b0.png",
+    title: "Batch Processing",
+    description: "Operational Correctness",
+    image: "/images/digital-trading.png",
   },
   {
-    title: "Built-In LED Flashlight",
-    description: "Visibility",
-    image: "/images/led-flashlight-bottle.png",
+    title: "Complete Audit Trail",
+    description: "Transparency",
+    image: "/images/international-ops.png",
   },
   {
-    title: "Self-Heating Technology",
-    description: "Comfort",
-    image: "/images/heating-campfire.png",
+    title: "KYC Compliance",
+    description: "Regulatory",
+    image: "/images/indian-ops.png",
   },
 ];
 
 export function FeaturedProductsSection() {
   return (
-    <section id="technology" className="bg-background">
+    <section id="architecture" className="bg-background">
       {/* Section Title */}
       <div className="px-6 py-20 text-center md:px-12 md:py-28 lg:px-20 lg:py-32 lg:pb-20">
         <h2 className="text-3xl font-medium tracking-tight text-foreground md:text-4xl lg:text-5xl">
-          Engineered for Excellence.
+          Built for Compliance.
           <br />
-          Designed for Adventure.
+          Designed for Trust.
         </h2>
         <p className="mx-auto mt-6 max-w-md text-sm text-muted-foreground">
-          Technology
+          Platform Features
         </p>
       </div>
 
@@ -79,7 +79,7 @@ export function FeaturedProductsSection() {
 
       {/* CTA Link */}
       <div className="flex justify-center px-6 pb-28 md:px-12 lg:px-20">
-        
+
       </div>
     </section>
   );

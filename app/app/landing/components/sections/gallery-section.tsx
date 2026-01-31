@@ -11,15 +11,13 @@ export function GallerySection() {
   const rafRef = useRef<number | null>(null);
   const lastScrollRef = useRef(0);
 
-  const images = [
-    { src: "/images/bottle-bike.png", alt: "Thermal bottle on bike" },
-    { src: "/images/bottle-lake.png", alt: "Thermal bottle by lake" },
-    { src: "/images/bottle-water.png", alt: "Thermal bottle in water" },
-    { src: "/images/bottle-stream.png", alt: "Thermal bottle by stream" },
-    { src: "/images/bottle-fire.png", alt: "Thermal bottle by fire" },
-    { src: "/images/bottle-snow.png", alt: "Thermal bottle in snow" },
-    { src: "/images/bottle-mountain.png", alt: "Thermal bottle on mountain" },
-    { src: "/images/bottle-canyon.png", alt: "Thermal bottle at canyon" },
+  const workflowSteps = [
+    { src: "/images/digital-trading.png", alt: "Step 1: User initiates silver purchase" },
+    { src: "/images/blockchain-network.png", alt: "Step 2: Order enters batch processing queue" },
+    { src: "/images/silver-custody.png", alt: "Step 3: Physical silver acquired and verified" },
+    { src: "/images/hero-main-silver.png", alt: "Step 4: Silver stored in secure custody" },
+    { src: "/images/international-ops.png", alt: "Step 5: DST tokens minted on Stellar" },
+    { src: "/images/indian-ops.png", alt: "Step 6: Tokens credited to user wallet" },
   ];
 
   // Calculate section height based on content width
@@ -45,23 +43,23 @@ export function GallerySection() {
 
   const updateTransform = useCallback(() => {
     if (!galleryRef.current || !containerRef.current) return;
-    
+
     const rect = galleryRef.current.getBoundingClientRect();
     const containerWidth = containerRef.current.scrollWidth;
     const viewportWidth = window.innerWidth;
-    
+
     // Total scroll distance needed to reveal all images
     const totalScrollDistance = containerWidth - viewportWidth;
-    
+
     // Current scroll position within this section
     const scrolled = Math.max(0, -rect.top);
-    
+
     // Progress from 0 to 1
     const progress = Math.min(1, scrolled / totalScrollDistance);
-    
+
     // Calculate new translateX
     const newTranslateX = progress * -totalScrollDistance;
-    
+
     setTranslateX(newTranslateX);
   }, []);
 
@@ -71,14 +69,14 @@ export function GallerySection() {
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
-      
+
       // Use requestAnimationFrame for smooth updates
       rafRef.current = requestAnimationFrame(updateTransform);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     updateTransform();
-    
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
       if (rafRef.current) {
@@ -88,8 +86,8 @@ export function GallerySection() {
   }, [updateTransform]);
 
   return (
-    <section 
-      id="gallery"
+    <section
+      id="workflow"
       ref={galleryRef}
       className="relative bg-background"
       style={{ height: sectionHeight }}
@@ -98,7 +96,7 @@ export function GallerySection() {
       <div className="sticky top-0 h-screen overflow-hidden">
         <div className="flex h-full items-center">
           {/* Horizontal scrolling container */}
-          <div 
+          <div
             ref={containerRef}
             className="flex gap-6 px-6"
             style={{
@@ -111,7 +109,7 @@ export function GallerySection() {
               touchAction: 'pan-y',
             }}
           >
-            {images.map((image, index) => (
+            {workflowSteps.map((step, index) => (
               <div
                 key={index}
                 className="relative h-[70vh] w-[85vw] flex-shrink-0 overflow-hidden rounded-2xl md:w-[60vw] lg:w-[45vw]"
@@ -121,8 +119,8 @@ export function GallerySection() {
                 }}
               >
                 <Image
-                  src={image.src || "/placeholder.svg"}
-                  alt={image.alt}
+                  src={step.src || "/placeholder.svg"}
+                  alt={step.alt}
                   fill
                   className="object-cover"
                   priority={index < 3}

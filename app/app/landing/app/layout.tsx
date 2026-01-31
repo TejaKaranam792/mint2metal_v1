@@ -7,8 +7,8 @@ import './globals.css'
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'VILDMARK | Go Further',
-  description: 'High-performance outdoor gear engineered for the modern explorer. Lightweight, durable, adventure-ready.',
+  title: 'Mint2Metal | Tokenized Silver Platform',
+  description: 'Operations-first Real World Asset platform for tokenizing physically backed silver. Built on Stellar blockchain with strict custody guarantees and compliance readiness.',
   generator: 'v0.app',
   icons: {
     icon: [

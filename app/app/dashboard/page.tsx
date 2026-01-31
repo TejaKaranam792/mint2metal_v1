@@ -88,8 +88,8 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto"></div>
-          <p className="text-lg text-secondary-text animate-pulse">Loading your dashboard...</p>
+          <div className="w-16 h-16 border-4 border-muted/20 border-t-foreground rounded-full animate-spin mx-auto"></div>
+          <p className="text-lg text-muted-foreground animate-pulse">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -159,67 +159,65 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      
-
-      <div className="container py-8">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Welcome Section */}
-        <div className="mb-8">
+        <div className="mb-8 animate-reveal-up">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-primary-text mb-1">
+              <h1 className="text-4xl font-bold text-foreground mb-2">
                 Welcome back, {user?.name || 'User'}
               </h1>
-              <p className="text-accent">Your silver portfolio at a glance</p>
+              <p className="text-muted-foreground text-lg">Your silver portfolio at a glance</p>
             </div>
             <div className="hidden md:block text-right">
-              <p className="text-sm text-secondary-text">Portfolio Value</p>
-              <p className="text-xl font-bold text-primary-text">₹{portfolioValueINR.toLocaleString()}</p>
+              <p className="text-sm text-muted-foreground mb-1">Portfolio Value</p>
+              <p className="text-2xl font-bold text-foreground">₹{portfolioValueINR.toLocaleString()}</p>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in-0 duration-500">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column: Metrics and Actions */}
           <div className="space-y-8">
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 gap-6 animate-in slide-in-from-left-4 duration-700 delay-100">
-              <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20">
+            <div className="grid grid-cols-1 gap-6 animate-reveal-up animation-delay-100">
+              <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-emerald-400/80 mb-1">Silver Balance</p>
-                      <p className="text-2xl font-bold text-white">{silverBalance}g</p>
+                      <p className="text-3xl font-bold text-foreground">{silverBalance}g</p>
                     </div>
-                    <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-                      <span className="text-2xl">🥈</span>
+                    <div className="w-14 h-14 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                      <span className="text-3xl">🥈</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+              <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20 hover:border-blue-500/40 transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-blue-400/80 mb-1">Current Price</p>
-                      <p className="text-2xl font-bold text-white">₹{currentPrice.toLocaleString()}</p>
+                      <p className="text-3xl font-bold text-foreground">₹{currentPrice.toLocaleString()}</p>
                     </div>
-                    <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                      <span className="text-2xl">📊</span>
+                    <div className="w-14 h-14 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                      <span className="text-3xl">📊</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+              <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20 hover:border-purple-500/40 transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-purple-400/80 mb-1">Vault Status</p>
-                      <p className="text-lg font-semibold text-white">{vaultStatus}</p>
+                      <p className="text-lg font-semibold text-foreground">{vaultStatus}</p>
                     </div>
-                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                      <span className="text-2xl">🏦</span>
+                    <div className="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                      <span className="text-3xl">🏦</span>
                     </div>
                   </div>
                 </CardContent>
@@ -227,35 +225,35 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Actions */}
-            <Card variant="elevated" icon="⚡">
+            <Card className="animate-reveal-up animation-delay-200">
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle className="text-2xl">Quick Actions</CardTitle>
                 <CardDescription>Manage your silver investments</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-3">
                   <Link href="/dashboard/trading">
-                    <Button variant="success" size="lg" className="w-full justify-start">
-                      <span>💰</span>
-                      Buy Silver
+                    <Button variant="default" size="lg" className="w-full justify-start gap-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300">
+                      <span className="text-xl">💰</span>
+                      <span>Buy Silver</span>
                     </Button>
                   </Link>
                   <Link href="/dashboard/trading">
-                    <Button variant="outline" size="lg" className="w-full justify-start border-orange-500/30 text-orange-400 hover:bg-orange-500/10">
-                      <span>📈</span>
-                      Sell Silver
+                    <Button variant="outline" size="lg" className="w-full justify-start gap-3 border-orange-500/30 text-orange-400 hover:bg-orange-500/10 hover:border-orange-500/50 transition-all duration-300">
+                      <span className="text-xl">📈</span>
+                      <span>Sell Silver</span>
                     </Button>
                   </Link>
                   <Link href="/dashboard/loans">
-                    <Button variant="outline" size="lg" className="w-full justify-start border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
-                      <span>🏦</span>
-                      Get Loan
+                    <Button variant="outline" size="lg" className="w-full justify-start gap-3 border-blue-500/30 text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all duration-300">
+                      <span className="text-xl">🏦</span>
+                      <span>Get Loan</span>
                     </Button>
                   </Link>
                   <Link href="/dashboard/redemption">
-                    <Button variant="outline" size="lg" className="w-full justify-start border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
-                      <span>🔄</span>
-                      Redeem Physical
+                    <Button variant="outline" size="lg" className="w-full justify-start gap-3 border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/50 transition-all duration-300">
+                      <span className="text-xl">🔄</span>
+                      <span>Redeem Physical</span>
                     </Button>
                   </Link>
                 </div>
@@ -264,16 +262,16 @@ export default function Dashboard() {
           </div>
 
           {/* Right Column: Recent Activity */}
-          <div>
-            <Card className="border-slate-700/50">
+          <div className="animate-reveal-up animation-delay-300">
+            <Card className="border-border/50 hover:border-border transition-all duration-300">
               <CardHeader>
-                <CardTitle className="text-2xl text-white flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">📊</span>
+                <CardTitle className="text-2xl text-foreground flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-lg">📊</span>
                   </div>
                   Recent Activity
                 </CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="text-muted-foreground">
                   Your latest transactions and activities
                 </CardDescription>
               </CardHeader>
