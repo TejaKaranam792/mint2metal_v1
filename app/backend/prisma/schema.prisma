@@ -1,0 +1,324 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  password         String?
+  role             UserRole
+  kycStatus        KycStatus @default(NOT_STARTED)
+  country          String?
+  twoFactorEnabled Boolean   @default(false)
+  twoFactorSecret  String?
+  amlStatus        AMLStatus @default(CLEARED)
+  amlDocument      String?
+  createdAt        DateTime  @default(now())
+
+  kycRecords         KycRecord[]
+  orders             Order[]
+  loanRequests       LoanRequest[]
+  redemptionRequests RedemptionRequest[]
+  dSTMints           DSTMint[]
+  redemptions        Redemption[]
+  loans              Loan[]
+  auditLogs          AuditLog[]
+  wallet             Wallet?             @relation("PrimaryWallet")
+  kycs               Kyc[]
+  priceLocks         PriceLock[]
+  purchaseOrders     PurchaseOrder[]
+  tradeIntents       TradeIntent[]
+  tradesAsUser       Trade[]             @relation("TradeUser")
+  buyerTrades        Trade[]             @relation("TradeBuyer")
+  sellerTrades       Trade[]             @relation("TradeSeller")
+}
+
+model KycRecord {
+  id                String    @id @default(uuid())
+  userId            String
+  status            String    @default("NOT_STARTED")
+  documentRef       String?
+  verifiedAt        DateTime?
+  kycLevel          String?
+  kycRejectedReason String?
+  kycVerifiedAt     DateTime?
+
+  submittedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("KYC")
+}
+
+model Order {
+  id            String      @id @default(uuid())
+  userId        String
+  type          OrderType
+  quantityGrams Float
+  priceLocked   Float
+  status        OrderStatus @default(PENDING)
+  isTestnet     Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model LoanRequest {
+  id              String     @id @default(uuid())
+  userId          String
+  collateralGrams Float
+  requestedAmount Float
+  status          LoanStatus @default(PENDING_APPROVAL)
+  createdAt       DateTime   @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model RedemptionRequest {
+  id            String           @id @default(uuid())
+  userId        String
+  quantityGrams Float
+  status        RedemptionStatus @default(REQUESTED)
+  createdAt     DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model WebhookEvent {
+  id          String    @id @default(uuid())
+  eventId     String    @unique
+  eventType   String
+  payload     String
+  processed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  processedAt DateTime?
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  INDIA_USER
+  INTERNATIONAL_USER
+}
+
+enum KycStatus {
+  NOT_STARTED
+  IN_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+enum OrderType {
+  BUY
+  SELL
+}
+
+enum OrderStatus {
+  PENDING
+  SETTLED
+  REJECTED
+}
+
+enum LoanStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  CLOSED
+}
+
+enum RedemptionStatus {
+  REQUESTED
+  APPROVED
+  SHIPPED
+  COMPLETED
+  REJECTED
+}
+
+enum AMLStatus {
+  CLEARED
+  FLAGGED
+  BLOCKED
+}
+
+model DSTMint {
+  id            String   @id @default(uuid())
+  userId        String
+  walletId      String
+  amount        Float
+  mintedAt      DateTime @default(now())
+  status        String   @default("PENDING")
+  txHash        String?
+  silverAssetId String?
+
+  user        User         @relation(fields: [userId], references: [id])
+  wallet      Wallet       @relation(fields: [walletId], references: [id])
+  silverAsset SilverAsset? @relation(fields: [silverAssetId], references: [id])
+}
+
+model Redemption {
+  id          String    @id @default(uuid())
+  userId      String
+  quantity    Float
+  address     String?
+  requestedAt DateTime  @default(now())
+  fulfilledAt DateTime?
+  status      String    @default("REQUESTED")
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Loan {
+  id        String   @id @default(uuid())
+  userId    String
+  amount    Float
+  createdAt DateTime @default(now())
+  status    String   @default("PENDING")
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  details   String?
+  reference String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Wallet {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  address       String    @unique
+  balance       Float     @default(0)
+  chain         String    @default("Stellar")
+  walletType    String    @default("EXTERNAL")
+  isConnected   Boolean   @default(false)
+  lastConnected DateTime?
+
+  user     User      @relation("PrimaryWallet", fields: [userId], references: [id])
+  dstmints DSTMint[]
+}
+
+model Kyc {
+  id                 String    @id @default(uuid())
+  userId             String
+  status             String    @default("NOT_STARTED")
+  kycRejectedReason  String?
+  verifiedAt         DateTime?
+  verificationSource String?
+  verifiedBy         String?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model SilverPrice {
+  id           String   @id @default(uuid())
+  price        Float
+  pricePerGram Float
+  currency     String?
+  setBy        String?
+  active       Boolean  @default(true)
+  setAt        DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SilverAsset {
+  id          String  @id @default(uuid())
+  weightGrams Float
+  purity      Float
+  location    String
+  vaultId     String
+  mint        String?
+  available   Boolean @default(true)
+
+  priceLocks PriceLock[]
+  dstmints   DSTMint[]
+}
+
+model PriceLock {
+  id            String   @id @default(uuid())
+  userId        String
+  silverAssetId String?
+  price         Float
+  lockedPrice   Float?
+  status        String   @default("ACTIVE")
+  lockedAt      DateTime @default(now())
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  usedForMint   Boolean  @default(false)
+
+  user        User         @relation(fields: [userId], references: [id])
+  silverAsset SilverAsset? @relation(fields: [silverAssetId], references: [id])
+}
+
+model PurchaseOrder {
+  id            String   @id @default(uuid())
+  userId        String
+  quantityGrams Float
+  weightGrams   Float
+  price         Float
+  pricePerGram  Float?
+  totalAmount   Float?
+  dealerName    String?
+  status        String   @default("PENDING")
+  orderDate     DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model TradeIntent {
+  id         String    @id @default(uuid())
+  userId     String
+  type       String
+  amount     Float
+  price      Float
+  totalValue Float
+  status     String    @default("PENDING")
+  executedAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user   User    @relation(fields: [userId], references: [id])
+  trades Trade[]
+}
+
+model Trade {
+  id         String    @id @default(uuid())
+  userId     String
+  intentId   String
+  buyerId    String
+  sellerId   String
+  type       String
+  amount     Float
+  price      Float
+  status     String    @default("PENDING")
+  executedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user          User         @relation("TradeUser", fields: [userId], references: [id])
+  buyer         User         @relation("TradeBuyer", fields: [buyerId], references: [id])
+  seller        User         @relation("TradeSeller", fields: [sellerId], references: [id])
+  tradeIntent   TradeIntent? @relation(fields: [tradeIntentId], references: [id])
+  tradeIntentId String?
+}
+
+model SystemSettings {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  updatedBy   String?
+  description String?
+  updatedAt   DateTime @updatedAt
+}

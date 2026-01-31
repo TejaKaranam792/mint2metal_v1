@@ -1,0 +1,13 @@
+{"error":{},"level":"error","message":"Failed to create wallet","timestamp":"2026-01-30T10:23:36.551Z","userId":"bfb8af09-878b-451b-b68a-fb176e519b12"}
+{"error":{},"level":"error","message":"Failed to create wallet","timestamp":"2026-01-30T10:24:21.688Z","userId":"bfb8af09-878b-451b-b68a-fb176e519b12"}
+{"error":{},"level":"error","message":"Failed to create wallet","timestamp":"2026-01-30T10:25:07.474Z","userId":"bfb8af09-878b-451b-b68a-fb176e519b12"}
+{"error":{},"level":"error","message":"Failed to create wallet","timestamp":"2026-01-30T10:25:21.071Z","userId":"bfb8af09-878b-451b-b68a-fb176e519b12"}
+{"error":{},"level":"error","message":"Failed to create wallet","timestamp":"2026-01-30T10:25:40.177Z","userId":"bfb8af09-878b-451b-b68a-fb176e519b12"}
+{"error":{},"level":"error","message":"Failed to create wallet","timestamp":"2026-01-30T10:26:29.210Z","userId":"bfb8af09-878b-451b-b68a-fb176e519b12"}
+{"address":"GD275XUQFID3TPHVUQSKU3OJXIB5TI3KJOAFWIDSQN3LBLU6EOZMHH7T","error":{},"level":"error","message":"Failed to connect external wallet","timestamp":"2026-01-30T14:52:54.351Z","userId":"af5e6de2-fce8-4828-99d1-80a15877a98b"}
+{"address":"GD275XUQFID3TPHVUQSKU3OJXIB5TI3KJOAFWIDSQN3LBLU6EOZMHH7T","error":{},"level":"error","message":"Failed to connect external wallet","timestamp":"2026-01-30T17:10:22.554Z","userId":"c150e185-4573-419a-b8ef-50988f64d20d"}
+{"address":"GD275XUQFID3TPHVUQSKU3OJXIB5TI3KJOAFWIDSQN3LBLU6EOZMHH7T","error":{},"level":"error","message":"Failed to connect external wallet","timestamp":"2026-01-30T19:48:53.041Z","userId":"c150e185-4573-419a-b8ef-50988f64d20d"}
+{"address":"GD275XUQFID3TPHVUQSKU3OJXIB5TI3KJOAFWIDSQN3LBLU6EOZMHH7T","error":{},"level":"error","message":"Failed to connect external wallet","timestamp":"2026-01-30T19:56:46.801Z","userId":"1ef9b8fb-b8fe-48f6-9226-15903ab1f25b"}
+{"address":"GD275XUQFID3TPHVUQSKU3OJXIB5TI3KJOAFWIDSQN3LBLU6EOZMHH7T","error":{},"level":"error","message":"Failed to connect external wallet","timestamp":"2026-01-30T20:19:51.193Z","userId":"1ef9b8fb-b8fe-48f6-9226-15903ab1f25b"}
+{"address":"GD275XUQFID3TPHVUQSKU3OJXIB5TI3KJOAFWIDSQN3LBLU6EOZMHH7T","error":{},"level":"error","message":"Failed to connect external wallet","timestamp":"2026-01-30T21:35:00.510Z","userId":"1ef9b8fb-b8fe-48f6-9226-15903ab1f25b"}
+{"address":"GD275XUQFID3TPHVUQSKU3OJXIB5TI3KJOAFWIDSQN3LBLU6EOZMHH7T","level":"info","message":"External wallet connected","network":"TESTNET","timestamp":"2026-01-31T07:18:13.119Z","userId":"bfb8af09-878b-451b-b68a-fb176e519b12"}

@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #020617;
+    --surface: #0f172a;
+    --elevated-surface: #020617;
+    --border: #1e293b;
+    --primary-text: #f8fafc;
+    --secondary-text: #94a3b8;
+    --muted-text: #64748b;
+    --accent: #cbd5e1;
+    --success: #10b981;
+    --error: #ef4444;
+    --primary: #cbd5e1;
+    --secondary: #1e293b;
+    --muted: #64748b;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-background text-primary-text antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply bg-accent text-background hover:bg-accent/90;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-primary-text hover:bg-secondary/80;
+  }
+
+  .btn-outline {
+    @apply border border-border bg-background hover:bg-surface;
+  }
+
+  .btn-ghost {
+    @apply hover:bg-surface;
+  }
+
+  .card {
+    @apply rounded-lg border bg-surface shadow-sm;
+  }
+
+  .card-header {
+    @apply p-6;
+  }
+
+  .card-title {
+    @apply text-xl font-semibold text-primary-text;
+  }
+
+  .card-description {
+    @apply text-sm text-secondary-text;
+  }
+
+  .card-content {
+    @apply p-6 pt-0;
+  }
+
+  .input {
+    @apply flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-primary-text placeholder:text-muted-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .badge-default {
+    @apply bg-accent text-background;
+  }
+
+  .badge-secondary {
+    @apply bg-secondary text-primary-text;
+  }
+
+  .badge-success {
+    @apply bg-success text-primary-text;
+  }
+
+  .badge-error {
+    @apply bg-error text-primary-text;
+  }
+
+  .stat-card {
+    @apply bg-surface p-6 rounded-lg border border-border;
+  }
+
+  .stat-value {
+    @apply text-2xl font-bold text-primary-text;
+  }
+
+  .stat-label {
+    @apply text-sm text-secondary-text;
+  }
+
+  .table {
+    @apply w-full text-sm;
+  }
+
+  .table-header {
+    @apply border-b border-border;
+  }
+
+  .table-body {
+    @apply divide-y divide-border;
+  }
+
+  .table-head {
+    @apply h-12 px-4 text-left align-middle font-medium text-secondary-text;
+  }
+
+  .table-cell {
+    @apply p-4 align-middle;
+  }
+
+  .form-label {
+    @apply text-sm font-medium text-primary-text;
+  }
+
+  .form-error {
+    @apply text-sm text-error;
+  }
+}
+
+@layer utilities {
+  .container {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+}
