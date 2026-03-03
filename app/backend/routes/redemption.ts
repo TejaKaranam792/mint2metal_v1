@@ -45,16 +45,24 @@ const requireAdmin = (req: AuthenticatedRequest, res: express.Response, next: ex
 // POST /redemption/request
 router.post("/request", authenticateToken, async (req, res) => {
   try {
-    const { quantity, address } = req.body;
+    const { quantity, address, signedXdr } = req.body;
 
     if (!quantity || quantity <= 0 || !address) {
       return res.status(400).json({ success: false, message: "Valid quantity and address required" });
     }
 
-    const redemptionRequest = await requestRedemption(req.user.id, { quantity, address });
+    const userId = req.user?.userId || (req.user as any)?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User ID missing from authentication token" });
+    }
+
+    console.log("DEBUG REDEMPTION - req.user:", req.user, "extracted userId:", userId);
+    console.log("DEBUG REDEMPTION - req.body (specifically signedXdr):", !!signedXdr, signedXdr ? `${signedXdr.substring(0, 10)}...` : "UNDEFINED");
+
+    const redemptionRequest = await requestRedemption(userId, { quantity, address, signedXdr });
     res.json({ success: true, data: redemptionRequest });
   } catch (error) {
-    console.error(error);
+    console.error("DEBUG REDEMPTION - Error caught in request:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
@@ -62,7 +70,7 @@ router.post("/request", authenticateToken, async (req, res) => {
 // GET /redemption/my
 router.get("/my", authenticateToken, async (req, res) => {
   try {
-    const redemptions = await getUserRedemptions(req.user.id);
+    const redemptions = await getUserRedemptions(req.user.userId);
     res.json({ success: true, data: redemptions });
   } catch (error) {
     console.error(error);

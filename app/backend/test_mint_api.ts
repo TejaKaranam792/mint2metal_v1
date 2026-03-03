@@ -29,7 +29,7 @@ async function testMintAPI() {
         }),
       });
 
-      const adminLoginData = await adminLoginResponse.json();
+      const adminLoginData: any = await adminLoginResponse.json();
       console.log('Admin login response:', adminLoginData);
 
       if (adminLoginResponse.ok && adminLoginData.token) {

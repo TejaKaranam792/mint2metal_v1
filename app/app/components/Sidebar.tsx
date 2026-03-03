@@ -18,6 +18,7 @@ export default function Sidebar({ userType }: SidebarProps) {
     { href: '/dashboard/transactions', label: 'Transactions', icon: '📋' },
     ...(userType === 'INDIA' && user?.kyc?.status !== 'VERIFIED' ? [{ href: '/dashboard/kyc', label: 'KYC Verification', icon: '✅' }] : []),
     ...(userType === 'INDIA' ? [{ href: '/dashboard/redemption', label: 'Redeem', icon: '🔄' }] : []),
+    { href: '/dashboard/developer', label: 'Developer API', icon: '🔌' },
     { href: '/dashboard/settings', label: 'Settings', icon: '⚙️' },
   ];
 
@@ -32,11 +33,10 @@ export default function Sidebar({ userType }: SidebarProps) {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={`flex items-center px-4 py-2 rounded-lg ${
-                  pathname === item.href
-                    ? 'bg-[#111827] text-[#F9FAFB]'
-                    : 'text-[#9CA3AF] hover:bg-[#111827] hover:text-[#F9FAFB]'
-                }`}
+                className={`flex items-center px-4 py-2 rounded-lg ${pathname === item.href
+                  ? 'bg-[#111827] text-[#F9FAFB]'
+                  : 'text-[#9CA3AF] hover:bg-[#111827] hover:text-[#F9FAFB]'
+                  }`}
               >
                 <span className="mr-3">{item.icon}</span>
                 {item.label}

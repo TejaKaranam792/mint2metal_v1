@@ -1,0 +1,6 @@
+ℹ️  Simulating install transaction…
+❌ error: transaction simulation failed: HostError: Error(WasmVm, InvalidAction)
+
+Event log (newest first):
+   0: [Diagnostic Event] topics:[error, Error(WasmVm, InvalidAction)], data:"Module(Translation(TranslationError { inner: Validate(BinaryReaderError { inner: BinaryReaderErrorInner { message: "reference-types not enabled: zero byte expected", offset: 9671, needed_hint: None } }) }))"
+

@@ -4,15 +4,15 @@ import {
   BASE_FEE,
   Memo,
   Operation,
+  Horizon
 } from '@stellar/stellar-sdk';
-import Server from '@stellar/stellar-sdk';
 
 /**
  * SERVER-ONLY helper
  * Builds a dummy transaction XDR (unsigned)
  */
 export const signDummyTx = async (publicKey: string): Promise<string> => {
-  const server = new Server('https://horizon-testnet.stellar.org');
+  const server = new Horizon.Server('https://horizon-testnet.stellar.org');
 
   const account = await server.loadAccount(publicKey);
 

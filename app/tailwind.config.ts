@@ -28,38 +28,38 @@ const config: Config = {
       ============================ */
       colors: {
         /* ---- Base Backgrounds ---- */
-        background: "#020617",          // true near-black
-        surface: "#0A0F1F",             // cards
-        "surface-elevated": "#111827",  // modals, sheets
-        "surface-hover": "#141A2E",
+        background: "#FFFFFF",          // pure white
+        surface: "#F8FAFC",             // very light gray (slate-50)
+        "surface-elevated": "#F1F5F9",  // light gray (slate-100)
+        "surface-hover": "#E2E8F0",     // slate-200
 
         /* ---- Borders ---- */
-        border: "#1E293B",
-        "border-strong": "#334155",
-        "border-subtle": "#0F172A",
+        border: "#E2E8F0",              // slate-200
+        "border-strong": "#CBD5E1",     // slate-300
+        "border-subtle": "#F1F5F9",     // slate-100
 
         /* ---- Text ---- */
-        "primary-text": "#F8FAFC",      // platinum white
-        "secondary-text": "#9CA3AF",    // soft silver
-        "muted-text": "#6B7280",        // metadata / labels
+        "primary-text": "#0F172A",      // slate-900
+        "secondary-text": "#475569",    // slate-600
+        "muted-text": "#94A3B8",        // slate-400
 
-        /* ---- Primary Accent (Silver / Platinum) ---- */
-        primary: "#E5E7EB",             // main CTA / highlights
-        "primary-strong": "#F9FAFB",    // strong CTA
-        "primary-muted": "#9CA3AF",     // disabled / subtle
+        /* ---- Primary Accent (Simple / Clean) ---- */
+        primary: "#0F172A",             // slate-900 (high contrast)
+        "primary-strong": "#020617",    // almost black
+        "primary-muted": "#94A3B8",     // slate-400
 
         /* ---- Neutrals ---- */
-        secondary: "#1F2937",           // graphite
-        muted: "#374151",
+        secondary: "#F1F5F9",           // slate-100
+        muted: "#F8FAFC",               // slate-50
 
-        /* ---- Status (Muted, Institutional) ---- */
-        success: "#16A34A",             // compliance green
-        warning: "#D97706",             // amber
-        error: "#DC2626",               // deep red
-        info: "#64748B",                // slate info
+        /* ---- Status (Muted, Professional) ---- */
+        success: "#16A34A",             // green-600
+        warning: "#D97706",             // amber-600
+        error: "#DC2626",               // red-600
+        info: "#475569",                // slate-600
 
         /* ---- Utility ---- */
-        overlay: "rgba(0,0,0,0.65)",
+        overlay: "rgba(255,255,255,0.8)",
       },
 
       /* ============================

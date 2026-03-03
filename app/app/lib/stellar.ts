@@ -35,7 +35,7 @@ export class StellarService {
       networkPassphrase: Networks.TESTNET,
     })
       .addMemo(Memo.text('Mint2Metal Test'))
-      .addOperation(operations[0] as any) 
+      .addOperation(operations[0] as any)
       .setTimeout(30)
       .build();
   }
@@ -53,57 +53,25 @@ export class StellarService {
   async submitTransaction(
     signedXDR: string
   ): Promise<{ hash: string; successful: boolean }> {
-    // When using fromXDR, modern SDKs return a Transaction or FeeBumpTransaction
-    const tx = TransactionBuilder.fromXDR(
-      signedXDR,
-      Networks.TESTNET
-    ) as Transaction;
+    try {
+      const tx = TransactionBuilder.fromXDR(
+        signedXDR,
+        Networks.TESTNET
+      ) as Transaction;
 
-    const result = await this.server.submitTransaction(tx);
-
-    return {
-      hash: result.hash,
-      successful: result.successful,
-    };
-  }
-
-  async performTestTransaction(publicKey: string) {
-    const operation = Operation.manageData({
-      name: 'Mint2Metal_Test',
-      value: `Test data: ${Date.now()}`,
-    });
-
-    // Operation.manageData returns a valid Operation object
-    const tx = await this.buildTransaction(publicKey, [operation as any]);
-    const signedXDR = await this.signWithFreighter(tx);
-    return this.submitTransaction(signedXDR);
+      const result = await this.server.submitTransaction(tx);
+      return { hash: result.hash, successful: result.successful };
+    } catch (error: any) {
+      if (error.response?.data?.extras?.result_codes) {
+        const codes = error.response.data.extras.result_codes;
+        throw new Error(`Stellar Tx Failed: tx=${codes.transaction}, op=${codes.operations?.join(',')}`);
+      }
+      throw error;
+    }
   }
 
   getExplorerUrl(hash: string): string {
     return `https://stellar.expert/explorer/testnet/tx/${hash}`;
-  }
-
-  // Soroban read call (placeholder for when contracts are deployed)
-  async performSorobanReadCall(contractId?: string): Promise<any> {
-    if (!contractId || contractId === 'PLACEHOLDER_CONTRACT_ID') {
-      return { status: 'awaiting_deployment', message: 'Contract not yet deployed' };
-    }
-
-    try {
-      const server = new rpc.Server('https://soroban-testnet.stellar.org');
-      const contract = new Contract(contractId);
-
-      // This is a placeholder - actual implementation would depend on contract methods
-      // For now, just return a mock response
-      return {
-        status: 'success',
-        data: 'Placeholder Soroban read result',
-        contractId
-      };
-    } catch (error) {
-      console.error('Soroban read call failed:', error);
-      return { status: 'error', message: 'Failed to read from contract' };
-    }
   }
 }
 

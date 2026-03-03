@@ -104,6 +104,60 @@ export class AuthService {
     };
   }
 
+  static async googleLogin(googleId: string, email: string) {
+    // Try to find user by googleId first, then by email
+    let user = await prisma.user.findUnique({ where: { googleId } });
+
+    if (!user) {
+      // Check if a user with this email already exists (e.g. signed up with password)
+      user = await prisma.user.findUnique({ where: { email } });
+
+      if (user) {
+        // Link Google account to existing user
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { googleId },
+        });
+      } else {
+        // Create a new user via Google
+        user = await prisma.user.create({
+          data: {
+            email,
+            googleId,
+            role: UserRole.INDIA_USER,
+            country: 'INDIA',
+          },
+        });
+
+        await AuditService.logAction(
+          user.id,
+          AuditAction.USER_REGISTERED,
+          undefined,
+          { email, provider: 'google' },
+          undefined,
+          undefined
+        );
+      }
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '24h' }
+    );
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        country: user.country,
+        twoFactorEnabled: user.twoFactorEnabled,
+      },
+    };
+  }
+
   static async setupTwoFactor(userId: string) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {

@@ -1,0 +1,41 @@
+ℹ️  CARGO_BUILD_RUSTFLAGS=--remap-path-prefix=C:/Users/tejak/.cargo/registry/src= cargo rustc --manifest-path=Cargo.toml --crate-type=cdylib --target=wasm32v1-none --release
+   Compiling stellar-xdr v21.2.0
+   Compiling soroban-spec v21.7.7
+   Compiling soroban-spec-rust v21.7.7
+   Compiling soroban-env-macros v21.2.1
+   Compiling soroban-env-common v21.2.1
+   Compiling soroban-env-guest v21.2.1
+   Compiling soroban-sdk-macros v21.7.7
+   Compiling soroban-sdk v21.7.7
+   Compiling dst-token v0.1.0 (C:\Users\tejak\OneDrive\Desktop\Mint2Metal\app\contracts\dst-token)
+warning: unused import: `IntoVal`
+ --> src\lib.rs:3:71
+  |
+3 | use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, IntoVal, String, Symbol, BytesN};
+  |                                                                       ^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `dst-token` (lib) generated 1 warning
+    Finished `release` profile [optimized] target(s) in 21.41s
+ℹ️  Build Summary:
+    Wasm File: target\wasm32v1-none\release\dst_token.wasm (11649 bytes)
+    Wasm Hash: 07da11851187da3817115268d68bd8fbd9573fcb359ed3a4c633b3166e502314
+    Wasm Size: 11649 bytes
+    Exported Functions: 14 found
+      • _
+      • get_asset_class
+      • get_fees
+      • get_role
+      • initialize
+      • is_frozen
+      • mint_with_custody
+      • register_asset_class
+      • set_freeze
+      • set_paused
+      • set_role
+      • submit_raw_receipt
+      • update_fees
+      • upgrade
+✅ Build Complete
+

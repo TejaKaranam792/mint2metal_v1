@@ -1,0 +1,9 @@
+Admin PK: GABTF6HFGUGYGUSMU23SC3NWQOJKNADKZAJZY3NOARNE3ORLSKGNVREL
+Current flags: {"auth_required":false,"auth_revocable":false,"auth_immutable":false,"auth_clawback_enabled":false}
+Will set AUTH_REVOCABLE + AUTH_CLAWBACK_ENABLED (flags 4|8 = 12)
+Transaction signed. Submitting to Horizon...
+SUCCESS: setOptions tx hash = 60f1ce993cbb23ae76391559902e45ccf0b0db0d33606e4d8b7bd5c9ee1589bf
+Updated flags: {"auth_required":false,"auth_revocable":false,"auth_immutable":false,"auth_clawback_enabled":false}
+
+Looking for existing XAG trustline holders...
+Trustlines updated: 0

@@ -3,7 +3,7 @@ import { prisma } from "../prisma";
 /**
  * Start KYC process
  */
-export async function startKYC(userId: string, levelName: string = 'basic-kyc-level') {
+export async function startKYC(userId: string, levelName: string = 'id-and-liveness') {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new Error("User not found");
 
@@ -133,7 +133,7 @@ export async function submitKYC(userId: string, documentData?: string) {
     kycRecord = await prisma.kycRecord.create({
       data: {
         userId,
-        kycLevel: 'basic-kyc-level',
+        kycLevel: 'id-and-liveness',
       },
     });
   }

@@ -70,13 +70,13 @@ export class WalletService {
   private async validateUserEligibility(userId: string): Promise<void> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { kycs: true }
+      include: { wallet: true }
     });
 
     if (!user) throw new Error('User not found');
 
-    // Check KYC status
-    if (user.kycs?.[0]?.status !== 'VERIFIED') {
+    // Check KYC status (use user-level kycStatus field, updated by Sumsub webhook)
+    if (user.kycStatus !== 'VERIFIED') {
       throw new Error('KYC verification required for wallet operations');
     }
 
@@ -174,50 +174,58 @@ export class WalletService {
     try {
       await this.validateUserEligibility(userId);
 
-      // Validate address format
       if (!StrKey.isValidEd25519PublicKey(address)) {
         throw new Error('Invalid Stellar address format');
       }
 
-      // Check if user already has a wallet
-      const existingWallet = await prisma.wallet.findUnique({
-        where: { userId }
-      });
-
-      if (existingWallet) {
-        // Update existing wallet
-        await prisma.wallet.update({
-          where: { userId },
-          data: {
-            address,
-            chain: 'Stellar',
-            walletType: 'EXTERNAL',
-            isConnected: true,
-            lastConnected: new Date()
-          }
+      // If this address is already linked to a DIFFERENT account, release it first.
+      // Freighter ownership (the user authenticated and signed) proves control.
+      const conflictingWallet = await prisma.wallet.findUnique({ where: { address } });
+      if (conflictingWallet && conflictingWallet.userId !== userId) {
+        this.logger.warn('Releasing address from old account to re-link', {
+          address,
+          oldUserId: conflictingWallet.userId,
+          newUserId: userId,
         });
-      } else {
-        // Create new external wallet
-        await prisma.wallet.create({
+
+        // Instead of deleting (which fails due to DSTMint's RESTRICT constraint),
+        // we "release" the address by renaming it to a unique unlinked placeholder.
+        await prisma.wallet.update({
+          where: { address },
           data: {
-            userId,
-            address,
-            chain: 'Stellar',
-            walletType: 'EXTERNAL',
-            isConnected: true,
-            lastConnected: new Date()
+            address: `unlinked-${address}-${Date.now()}`,
+            isConnected: false
           }
         });
       }
 
-      // Log wallet connection
+      // Upsert: update if user already has a wallet, create if not
+      await prisma.wallet.upsert({
+        where: { userId },
+        update: {
+          address,
+          chain: 'Stellar',
+          walletType: 'EXTERNAL',
+          isConnected: true,
+          lastConnected: new Date(),
+        },
+        create: {
+          userId,
+          address,
+          chain: 'Stellar',
+          walletType: 'EXTERNAL',
+          isConnected: true,
+          lastConnected: new Date(),
+        },
+      });
+
       await prisma.auditLog.create({
         data: {
           userId,
           action: 'WALLET_CONNECTED',
           reference: address,
-          details: JSON.stringify({ address, network, walletType: 'EXTERNAL' })
-        }
+          details: JSON.stringify({ address, network, walletType: 'EXTERNAL' }),
+        },
       });
 
       this.logger.info('External wallet connected', { userId, address, network });
@@ -227,6 +235,7 @@ export class WalletService {
       throw error;
     }
   }
+
 
   /**
    * Disconnect external wallet
@@ -445,7 +454,7 @@ export class WalletService {
 
       if (!user) return false;
       if (!user.wallet) return false;
-      if (user.kycs?.[0]?.status !== 'VERIFIED') return false;
+      if (user.kycStatus !== 'VERIFIED') return false;
       if (user.amlStatus === 'FLAGGED') return false;
 
       // Additional role-based checks

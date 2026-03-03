@@ -1,6 +1,6 @@
 "use client";
 
-import { FadeImage } from "@/components/fade-image";
+import { FadeImage } from "../fade-image";
 
 const dstMetrics = [
   {

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { tradingService, TradeType } from "../services/trading.service";
 import { getUserFromToken } from "../services/auth.service";
 import { generalRateLimit as rateLimit } from "../middleware/rate-limit.middleware";
+import { getCurrentSilverPrice } from "../services/silver.service";
 
 const router = express.Router();
 
@@ -164,6 +165,26 @@ router.post("/validate", requireAuth, async (req, res) => {
   } catch (error: any) {
     console.error("Validate trade error:", error);
     res.status(400).json({ error: error.message || "Trade validation failed" });
+  }
+});
+
+// Get current silver price (public, M2M per gram)
+router.get("/price", async (req, res) => {
+  try {
+    const price = await getCurrentSilverPrice();
+    res.json({
+      pricePerGram: price?.pricePerGram ?? 14.32,
+      currency: "M2M",
+      updatedAt: price?.setAt ?? new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error("Get silver price error:", error);
+    // Return fallback price on error
+    res.json({
+      pricePerGram: 14.32,
+      currency: "M2M",
+      updatedAt: new Date().toISOString(),
+    });
   }
 });
 

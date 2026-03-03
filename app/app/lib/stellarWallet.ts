@@ -5,10 +5,17 @@ export const connectWallet = async (): Promise<{ publicKey: string; network: str
   // Check KYC status before allowing wallet connection
   try {
     const kycRes = await getCurrentKYCStatus();
-    if (kycRes.status !== 'VERIFIED') {
+    // Backend returns { success, status: { status: "VERIFIED", message } }
+    const kycStatus = typeof kycRes?.status === 'string'
+      ? kycRes.status
+      : kycRes?.status?.status;
+    if (kycStatus !== 'VERIFIED') {
       throw new Error('KYC verification required before connecting wallet');
     }
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'KYC verification required before connecting wallet') {
+      throw error;
+    }
     throw new Error('KYC verification required before connecting wallet');
   }
 
@@ -18,8 +25,15 @@ export const connectWallet = async (): Promise<{ publicKey: string; network: str
   }
 
   await FreighterApi.requestAccess();
-  const publicKeyResult = await FreighterApi.getAddress();
-  const networkDetails = await FreighterApi.getNetworkDetails();
+  const pubKeyResult = await FreighterApi.getAddress();
+  const address = typeof pubKeyResult === 'object' && pubKeyResult !== null
+    ? (pubKeyResult as { address: string }).address
+    : pubKeyResult as unknown as string;
 
-  return { publicKey: publicKeyResult.address, network: networkDetails.network };
+  const netDetails = await FreighterApi.getNetworkDetails();
+  const network = typeof netDetails === 'object' && netDetails !== null && 'network' in netDetails
+    ? (netDetails as { network: string }).network
+    : netDetails as unknown as string;
+
+  return { publicKey: address, network };
 };

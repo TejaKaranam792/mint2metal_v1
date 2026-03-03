@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { AuthService } from "../services/auth.service";
 import { prisma } from "../prisma";
+import { OAuth2Client } from "google-auth-library";
 
 const router = Router();
+const googleClient = new OAuth2Client();
 
 router.post("/signup", async (req, res) => {
   const { email, password, country } = req.body;
@@ -114,6 +116,46 @@ router.post("/2fa/disable", async (req, res) => {
   } catch (error: any) {
     console.error("2FA disable error:", error);
     res.status(400).json({ error: error.message });
+  }
+});
+
+// Google OAuth Route
+router.post("/google", async (req, res) => {
+  const { credential } = req.body;
+
+  if (!credential) {
+    return res.status(400).json({ error: "Google credential is required" });
+  }
+
+  try {
+    // Verify the Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      return res.status(400).json({ error: "Invalid Google token" });
+    }
+
+    const googleId = payload.sub;
+    const email = payload.email;
+
+    const result = await AuthService.googleLogin(googleId, email);
+
+    // Fetch KYC status
+    const kyc = await prisma.kyc.findFirst({
+      where: { userId: result.user.id },
+    });
+
+    res.status(200).json({
+      user: { ...result.user, kyc },
+      token: result.token,
+    });
+  } catch (error: any) {
+    console.error("Google auth error:", error);
+    res.status(401).json({ error: error.message || "Google authentication failed" });
   }
 });
 

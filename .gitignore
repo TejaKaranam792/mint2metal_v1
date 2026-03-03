@@ -1,0 +1,78 @@
+# Dependencies
+node_modules/
+app/node_modules/
+app/backend/node_modules/
+
+# Logs
+*.log
+app/backend/*.log
+app/*.log
+app/backend/backend.log
+app/backend/soroban.log
+app/backend/wallet.log
+stellar-*.log
+
+# Build outputs
+dist/
+.next/
+out/
+app/.next/
+app/out/
+app/app/tsc-output.txt
+app/app/tsc-output2.txt
+app/backend/tsc_output.txt
+app/backend/tsc.log
+app/backend/build.log
+app/backend/build.txt
+app/backend/out.txt
+app/backend/out2.txt
+app/backend/output.txt
+
+# Environment variables
+.env
+.env.local
+app/.env.local
+app/backend/.env
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Temporary/Investigation files
+git_status_output.txt
+git_status_utf8.txt
+app/backend/check-*-out.txt
+app/backend/probe-test.txt
+app/backend/tsc-err.txt
+app/backend/tsc-errors.txt
+app/backend/tsc-output.txt
+app/backend/tsc-output2.txt
+app/backend/build-errors.txt
+app/backend/debug.txt
+app/backend/error.txt
+app/backend/errors.txt
+app/backend/check-log.txt
+app/backend/cmd-out.txt
+app/backend/pm2_output.txt
+app/backend/sim_result.txt
+app/backend/test.txt
+app/backend/ts_output.txt
+app/backend/wrap-log.txt
+app/backend/fix-out.txt
+app/backend/fix-log.txt
+app/backend/fix-issuer-log.txt
+app/backend/deploy-log.txt
+app/backend/deploy-internal.log
+app/backend/deploy.log
+app/backend/deploy_utf8.log
+
+# Rust/Soroban
+**/target/
+**/Cargo.lock (if you want to ignore it, but target/ is the main one)
+app/contracts/oracle-aggregator/target/
+
+# Other temporary directories
+my-app/
+app/app/(dashboard)/

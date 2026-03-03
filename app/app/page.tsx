@@ -20,7 +20,7 @@ export default function Home() {
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/auth/login" className="text-secondary-text hover:text-primary-text transition-colors">Sign In</Link>
-              <Link href="/auth/signup" className="bg-gradient-to-r from-primary to-accent text-background px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-200 hover:scale-105 font-semibold">
+              <Link href="/dashboard" className="bg-gradient-to-r from-primary to-accent text-background px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-200 hover:scale-105 font-semibold">
                 Get Started
               </Link>
             </div>

@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  userType: "INDIA_USER" | "INTERNATIONAL_USER" | "ADMIN" | null;
+  userType: "INDIA_USER" | "INTERNATIONAL_USER" | "ADMIN" | "API_INTEGRATOR" | null;
   userId: string | null;
   user: any;
   token: string | null;
@@ -18,7 +18,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userType, setUserType] = useState<"INDIA_USER" | "INTERNATIONAL_USER" | "ADMIN" | null>(null);
+  const [userType, setUserType] = useState<"INDIA_USER" | "INTERNATIONAL_USER" | "ADMIN" | "API_INTEGRATOR" | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, userId]);
 
   const login = (userData: any, token?: string) => {
-    const role = userData.role as "INDIA_USER" | "INTERNATIONAL_USER" | "ADMIN";
+    const role = userData.role as "INDIA_USER" | "INTERNATIONAL_USER" | "ADMIN" | "API_INTEGRATOR";
     setUserType(role);
     setUserId(userData.id);
     setUser(userData);

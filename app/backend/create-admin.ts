@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {prisma} from "./prisma";
+import { prisma } from "./prisma";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { UserRole } from "@prisma/client";
@@ -29,7 +29,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // 3️⃣ Compare password (CRITICAL)
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password || "");
 
     if (!isPasswordValid) {
       return res.status(401).json({

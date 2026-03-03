@@ -106,46 +106,62 @@ router.get("/me", authenticateToken, async (req: AuthenticatedRequest, res: Resp
   }
 });
 
-// Get silver balance
+// Get silver balance — reads live on-chain Soroban balance
 router.get("/silver-balance", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.userId;
 
-    // Get total silver assets owned by user (through mints)
-    const totalSilver = await prisma.dSTMint.aggregate({
-      where: {
-        wallet: { userId },
-        status: "MINTED"
-      },
-      _sum: {
-        amount: true
-      }
-    });
+    const wallet = await prisma.wallet.findUnique({ where: { userId } });
+    if (!wallet) {
+      return res.json({ balance: 0 });
+    }
 
-    res.json({ balance: totalSilver._sum.amount || 0 });
+    try {
+      const onChainBalance = await sorobanService.getBalance(wallet.address);
+      return res.json({ balance: parseFloat(onChainBalance) || 0 });
+    } catch (sorobanErr) {
+      // Soroban unavailable — fall back to DB mints so page doesn't break
+      console.warn("Soroban getBalance failed, falling back to DB:", sorobanErr);
+      const totalSilver = await prisma.dSTMint.aggregate({
+        where: {
+          wallet: { userId },
+          status: { in: ["MINTED", "COMPLETED"] }
+        },
+        _sum: { amount: true }
+      });
+      return res.json({ balance: totalSilver._sum.amount || 0 });
+    }
   } catch (error) {
     console.error("Error fetching silver balance:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Get DST balance
+// Get DST token balance — reads live on-chain Soroban balance
 router.get("/dst-balance", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.userId;
 
-    // Get total DST tokens minted for user
-    const totalDST = await prisma.dSTMint.aggregate({
-      where: {
-        wallet: { userId },
-        status: "MINTED"
-      },
-      _sum: {
-        amount: true
-      }
-    });
+    const wallet = await prisma.wallet.findUnique({ where: { userId } });
+    if (!wallet) {
+      return res.json({ balance: 0 });
+    }
 
-    res.json({ balance: totalDST._sum.amount || 0 });
+    try {
+      const onChainBalance = await sorobanService.getBalance(wallet.address);
+      return res.json({ balance: parseFloat(onChainBalance) || 0 });
+    } catch (sorobanErr) {
+      // Soroban unavailable — fall back to DB mints so page doesn't break
+      console.warn("Soroban getBalance failed, falling back to DB:", sorobanErr);
+      const totalDST = await prisma.dSTMint.aggregate({
+        where: {
+          wallet: { userId },
+          status: { in: ["MINTED", "COMPLETED"] }
+        },
+        _sum: { amount: true }
+      });
+      return res.json({ balance: totalDST._sum.amount || 0 });
+    }
   } catch (error) {
     console.error("Error fetching DST balance:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -158,19 +174,19 @@ router.get("/vault-status", authenticateToken, async (req: AuthenticatedRequest,
     const userId = req.user!.userId;
 
     // Get user's silver assets in vault
-    const vaultAssets = await prisma.silverAsset.findMany({
+    const vaultAssets = await prisma.commodityAsset.findMany({
       where: {
         dstmints: {
           some: {
-            wallet: { userId },
+            userId: userId,
             status: "MINTED"
           }
         }
       }
     });
 
-    const totalWeight = vaultAssets.reduce((sum, asset) => sum + asset.weightGrams, 0);
-    const totalValue = vaultAssets.reduce((sum, asset) => sum + (asset.weightGrams * asset.purity), 0);
+    const totalWeight = vaultAssets.reduce((sum: number, asset: any) => sum + asset.weightGrams, 0);
+    const totalValue = vaultAssets.reduce((sum: number, asset: any) => sum + (asset.weightGrams * asset.purity), 0);
 
     res.json({
       totalAssets: vaultAssets.length,
@@ -335,7 +351,119 @@ router.post("/submit-kyc", authenticateToken, async (req: AuthenticatedRequest, 
   }
 });
 
+// Get user's linked wallet address (for UI mismatch detection)
+router.get("/linked-wallet", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const wallet = await prisma.wallet.findUnique({ where: { userId } });
+    if (!wallet) return res.json({ address: null, isConnected: false });
+    res.json({ address: wallet.address, isConnected: wallet.isConnected, walletType: wallet.walletType });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || "Internal server error" });
+  }
+});
+
+// Build unsigned transfer transaction XDR — frontend signs with Freighter
+router.post("/build-transfer-tx", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const { toAddress, amount, fromAddress: freighterAddress, isTreasuryTransfer } = req.body;
+
+    let actualToAddress = toAddress;
+
+    if (isTreasuryTransfer) {
+      console.log("DEBUG: isTreasuryTransfer is true");
+      console.log("DEBUG: process.env.TREASURY_PUBLIC_KEY =", process.env.TREASURY_PUBLIC_KEY);
+      console.log("DEBUG: !!process.env.TREASURY_SECRET =", !!process.env.TREASURY_SECRET);
+
+      if (process.env.TREASURY_PUBLIC_KEY && process.env.TREASURY_PUBLIC_KEY !== "undefined") {
+        actualToAddress = process.env.TREASURY_PUBLIC_KEY;
+      } else if (process.env.TREASURY_SECRET && process.env.TREASURY_SECRET !== "undefined") {
+        const { Keypair } = await import('@stellar/stellar-sdk');
+        const treasuryKeypair = Keypair.fromSecret(process.env.TREASURY_SECRET);
+        actualToAddress = treasuryKeypair.publicKey();
+      }
+    }
+
+    console.log("DEBUG: final actualToAddress =", actualToAddress);
+
+    if (!actualToAddress || !amount || amount <= 0) {
+      return res.status(400).json({ error: "toAddress and amount are required" });
+    }
+
+    // DB wallet is the authoritative source — tokens are minted here
+    const wallet = await prisma.wallet.findUnique({ where: { userId } });
+    if (!wallet) {
+      return res.status(400).json({ error: "No wallet linked. Connect your Freighter wallet first." });
+    }
+
+    // Guard: Freighter address must match the linked DB wallet address
+    if (freighterAddress && freighterAddress !== wallet.address) {
+      return res.status(400).json({
+        error: `Wallet mismatch — your Freighter wallet (${freighterAddress.slice(0, 6)}...) does not match your linked wallet (${wallet.address.slice(0, 6)}...). Go to the Balance page and click "Reconnect Freighter" to re-link, then ask admin to re-mint tokens to your new address.`,
+        code: 'WALLET_MISMATCH',
+        linkedAddress: wallet.address,
+        freighterAddress,
+      });
+    }
+
+    const fromAddress = wallet.address;
+
+    const { TransactionBuilder, Networks, rpc, Asset, Operation } = await import('@stellar/stellar-sdk');
+    const RPC_URL = process.env.STELLAR_RPC_URL || 'https://soroban-testnet.stellar.org';
+    const server = new rpc.Server(RPC_URL);
+
+    // Auto-fund linked wallet on testnet if not activated
+    let account;
+    try {
+      account = await server.getAccount(fromAddress);
+    } catch (err: any) {
+      const isNotFound = err?.message?.includes('account not found') || err?.response?.status === 404;
+      if (isNotFound && process.env.STELLAR_NETWORK !== 'mainnet') {
+        console.warn(`Linked wallet ${fromAddress} not on-chain. Funding via Friendbot…`);
+        const fundRes = await fetch(`https://friendbot.stellar.org?addr=${encodeURIComponent(fromAddress)}`);
+        if (!fundRes.ok) {
+          return res.status(400).json({ error: `Linked wallet not activated. Fund it at: https://friendbot.stellar.org/?addr=${fromAddress}` });
+        }
+        account = await server.getAccount(fromAddress);
+      } else {
+        throw err;
+      }
+    }
+
+    const assetCode = 'XAG';
+    const { Keypair } = await import('@stellar/stellar-sdk');
+    const adminKeypair = Keypair.fromSecret(process.env.STELLAR_ADMIN_SECRET!);
+    const issuerPubKey = adminKeypair.publicKey();
+    const sendAsset = new Asset(assetCode, issuerPubKey);
+
+    const tx = new TransactionBuilder(account, {
+      fee: '10000', // classic transactions fee is usually 100-10000 stroops
+      networkPassphrase: Networks.TESTNET,
+    })
+      .addOperation(
+        Operation.payment({
+          destination: actualToAddress,
+          asset: sendAsset,
+          amount: amount.toString()
+        })
+      )
+      .setTimeout(30)
+      .build();
+
+    // Classic operations do not require Soroban simulation or footprint assembly.
+    res.json({ xdr: tx.toXDR(), fromAddress });
+  } catch (error: any) {
+    console.error("Error building transfer tx:", error);
+    res.status(500).json({ error: error.message || "Internal server error" });
+  }
+});
+
+
+
+
 // Transfer balance
+
 router.post("/transfer-balance", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.userId;
@@ -368,8 +496,8 @@ router.post("/transfer-balance", authenticateToken, async (req: AuthenticatedReq
 
     if (signedXdr) {
       // Submit signed transaction from frontend
-      const { SorobanRpc } = await import('@stellar/stellar-sdk');
-      const server = new SorobanRpc.Server(process.env.STELLAR_RPC_URL || 'https://soroban-testnet.stellar.org');
+      const { rpc } = await import('@stellar/stellar-sdk');
+      const server = new rpc.Server(process.env.STELLAR_RPC_URL || 'https://soroban-testnet.stellar.org');
       const result = await server.sendTransaction(signedXdr);
       txHash = result.hash;
     } else {

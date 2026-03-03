@@ -1,38 +1,70 @@
 #![no_std]
 
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, String};
+use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, IntoVal, String, Symbol, BytesN};
+use soroban_sdk::token::StellarAssetClient;
 
 #[contracttype]
 #[derive(Clone)]
 pub enum DataKey {
     Admin,
-    TotalSupply,
-    Balance(Address),
     Role(Address),
     Frozen(Address),
-    ReservesProof,
+    Registry(Symbol),
+    Receipt(String),
+    FeeConfig,
+    Paused,
 }
 
 #[contracttype]
-#[derive(Clone)]
-pub struct ReservesData {
-    pub proof_hash: String,
-    pub total_silver_grams: u64,
-    pub timestamp: u64,
-}
-
-#[contracttype]
+#[derive(Clone, PartialEq)]
 pub enum UserRole {
     Admin,
     Operator,
     User,
+    CustodyVerifier,
+    MintExecutor,
+    TreasuryAdmin,
+    Issuer,
+}
+
+#[contracttype]
+#[derive(Clone)]
+pub struct AssetClass {
+    pub commodity_type: Symbol,
+    pub token_address: Address,
+    pub unit_weight: u32,
+    pub purity: u32,
+    pub vault_id: String,
+    pub oracle_source: String,
+    pub issuer_id: Address,
+}
+
+#[contracttype]
+#[derive(Clone)]
+pub struct VaultReceipt {
+    pub receipt_id: String,
+    pub vault_id: String,
+    pub asset_class: Symbol,
+    pub amount_grams: u64,
+    pub custody_hash: String,
+    pub verifier: Address,
+    pub is_used: bool,
+}
+
+#[contracttype]
+#[derive(Clone)]
+pub struct FeeConfig {
+    pub issuance_fee_bps: u32,
+    pub storage_fee_bps: u32,
+    pub redemption_fee_bps: u32,
+    pub platform_fee_bps: u32,
 }
 
 #[contract]
-pub struct DSTToken;
+pub struct CommodityProtocol;
 
 #[contractimpl]
-impl DSTToken {
+impl CommodityProtocol {
     /// Initialize the contract with admin
     pub fn initialize(env: Env, admin: Address) {
         if env.storage().instance().has(&DataKey::Admin) {
@@ -40,221 +72,173 @@ impl DSTToken {
         }
 
         env.storage().instance().set(&DataKey::Admin, &admin);
-        env.storage().instance().set(&DataKey::TotalSupply, &0u64);
+        env.storage().instance().set(&DataKey::Paused, &false);
 
         // Set admin role
         env.storage().instance().set(&DataKey::Role(admin.clone()), &UserRole::Admin);
 
-        // Initialize reserves proof
-        let initial_reserves = ReservesData {
-            proof_hash: String::from_str(&env, ""),
-            total_silver_grams: 0,
-            timestamp: env.ledger().timestamp(),
+        // Default Fee Config
+        let fees = FeeConfig {
+            issuance_fee_bps: 0,
+            storage_fee_bps: 0,
+            redemption_fee_bps: 0,
+            platform_fee_bps: 0,
         };
-        env.storage().instance().set(&DataKey::ReservesProof, &initial_reserves);
+        env.storage().instance().set(&DataKey::FeeConfig, &fees);
     }
 
-    /// Mint tokens (admin only)
-    pub fn mint(env: Env, to: Address, amount: u64, reserves_proof: String) {
+    /// Register a new asset class mapped to a Native Stellar Asset (via SAC wrapper address)
+    pub fn register_asset_class(
+        env: Env,
+        commodity_type: Symbol,
+        token_address: Address,
+        unit_weight: u32,
+        purity: u32,
+        vault_id: String,
+        oracle_source: String,
+        issuer_id: Address,
+    ) {
         Self::require_admin(&env);
-
-        let mut total_supply: u64 = env.storage().instance().get(&DataKey::TotalSupply).unwrap_or(0);
-        let mut balance: u64 = env.storage().instance().get(&DataKey::Balance(to.clone())).unwrap_or(0);
-
-        // Check if user is frozen
-        if Self::is_frozen(env.clone(), to.clone()) {
-            panic!("Account is frozen");
-        }
-
-        total_supply += amount;
-        balance += amount;
-
-        env.storage().instance().set(&DataKey::TotalSupply, &total_supply);
-        env.storage().instance().set(&DataKey::Balance(to.clone()), &balance);
-
-        // Update reserves proof
-        let reserves_data = ReservesData {
-            proof_hash: reserves_proof,
-            total_silver_grams: total_supply, // Assuming 1:1 ratio for simplicity
-            timestamp: env.ledger().timestamp(),
+        
+        let asset = AssetClass {
+            commodity_type: commodity_type.clone(),
+            token_address,
+            unit_weight,
+            purity,
+            vault_id,
+            oracle_source,
+            issuer_id,
         };
-        env.storage().instance().set(&DataKey::ReservesProof, &reserves_data);
-
-        env.events().publish(("mint", to, amount), ());
+        
+        env.storage().instance().set(&DataKey::Registry(commodity_type.clone()), &asset);
+        env.events().publish(("asset_registered", commodity_type), ());
     }
 
-    /// Burn tokens (admin only)
-    pub fn burn(env: Env, from: Address, amount: u64) {
-        Self::require_admin(&env);
+    /// Get asset class details
+    pub fn get_asset_class(env: Env, commodity_type: Symbol) -> AssetClass {
+        env.storage().instance().get(&DataKey::Registry(commodity_type)).unwrap()
+    }
 
-        let mut total_supply: u64 = env.storage().instance().get(&DataKey::TotalSupply).unwrap_or(0);
-        let mut balance: u64 = env.storage().instance().get(&DataKey::Balance(from.clone())).unwrap_or(0);
-
-        if balance < amount {
-            panic!("Insufficient balance");
+    /// Submit a custody vault receipt (CustodyVerifier only)
+    pub fn submit_raw_receipt(
+        env: Env,
+        verifier: Address,
+        receipt_id: String,
+        vault_id: String,
+        asset_class: Symbol,
+        amount_grams: u64,
+        custody_hash: String,
+    ) {
+        verifier.require_auth();
+        let role = Self::get_role(env.clone(), verifier.clone());
+        if role != UserRole::CustodyVerifier && role != UserRole::Admin {
+            panic!("Unauthorized: Must be CustodyVerifier or Admin");
         }
 
-        total_supply -= amount;
-        balance -= amount;
+        let receipt = VaultReceipt {
+            receipt_id: receipt_id.clone(),
+            vault_id,
+            asset_class: asset_class.clone(),
+            amount_grams,
+            custody_hash: custody_hash.clone(),
+            verifier,
+            is_used: false,
+        };
 
-        env.storage().instance().set(&DataKey::TotalSupply, &total_supply);
-        env.storage().instance().set(&DataKey::Balance(from.clone()), &balance);
-
-        env.events().publish(("burn", from, amount), ());
+        env.storage().instance().set(&DataKey::Receipt(receipt_id.clone()), &receipt);
+        env.events().publish(("receipt_submitted", receipt_id, asset_class, amount_grams), ());
     }
 
-    /// Transfer tokens between users
-    pub fn transfer(env: Env, from: Address, to: Address, amount: u64) {
-        from.require_auth();
-
-        // Check if sender is frozen
-        if Self::is_frozen(env.clone(), from.clone()) {
-            panic!("Sender account is frozen");
+    /// Mint tokens backed strictly by verified physical custody using SAC
+    pub fn mint_with_custody(env: Env, executor: Address, receipt_id: String, to: Address) {
+        Self::require_not_paused(&env);
+        executor.require_auth();
+        let role = Self::get_role(env.clone(), executor.clone());
+        if role != UserRole::MintExecutor && role != UserRole::Admin {
+            panic!("Unauthorized: Must be MintExecutor or Admin");
         }
 
-        // Check if receiver is frozen
-        if Self::is_frozen(env.clone(), to.clone()) {
-            panic!("Receiver account is frozen");
+        // 1. Validate Custody Receipt
+        let mut receipt: VaultReceipt = env.storage().instance().get(&DataKey::Receipt(receipt_id.clone())).expect("Receipt not found");
+        if receipt.is_used {
+            panic!("Receipt already used for minting");
         }
+        
+        // 2. Validate Asset exists
+        let asset: AssetClass = env.storage().instance().get(&DataKey::Registry(receipt.asset_class.clone())).expect("Asset not registered");
 
-        let mut from_balance: u64 = env.storage().instance().get(&DataKey::Balance(from.clone())).unwrap_or(0);
-        let mut to_balance: u64 = env.storage().instance().get(&DataKey::Balance(to.clone())).unwrap_or(0);
+        // 3. Mark Receipt as used
+        receipt.is_used = true;
+        env.storage().instance().set(&DataKey::Receipt(receipt_id.clone()), &receipt);
 
-        if from_balance < amount {
-            panic!("Insufficient balance");
-        }
+        // 4. Mint directly via the Stellar Asset Contract
+        let amount_i128 = receipt.amount_grams as i128;
+        let sac_client = StellarAssetClient::new(&env, &asset.token_address);
+        
+        // As the admin of the SAC, we have the authority to call `mint`
+        sac_client.mint(&to, &amount_i128);
 
-        from_balance -= amount;
-        to_balance += amount;
-
-        env.storage().instance().set(&DataKey::Balance(from.clone()), &from_balance);
-        env.storage().instance().set(&DataKey::Balance(to.clone()), &to_balance);
-
-        env.events().publish(("transfer", from, to, amount), ());
+        env.events().publish(("mint_with_custody", to, asset.commodity_type, receipt.amount_grams, receipt.custody_hash), ());
     }
 
-    /// Get balance of an address
-    pub fn balance(env: Env, address: Address) -> u64 {
-        env.storage().instance().get(&DataKey::Balance(address)).unwrap_or(0)
-    }
+    /* GOVERNANCE & UTILITY FUNCTIONS */
 
-    /// Get total supply
-    pub fn total_supply(env: Env) -> u64 {
-        env.storage().instance().get(&DataKey::TotalSupply).unwrap_or(0)
-    }
-
-    /// Set freeze status (admin only)
     pub fn set_freeze(env: Env, address: Address, frozen: bool) {
         Self::require_admin(&env);
-
         env.storage().instance().set(&DataKey::Frozen(address.clone()), &frozen);
         env.events().publish(("freeze", address, frozen), ());
     }
 
-    /// Check if address is frozen
     pub fn is_frozen(env: Env, address: Address) -> bool {
         env.storage().instance().get(&DataKey::Frozen(address)).unwrap_or(false)
     }
 
-    /// Set user role (admin only)
     pub fn set_role(env: Env, address: Address, role: UserRole) {
         Self::require_admin(&env);
-
         env.storage().instance().set(&DataKey::Role(address.clone()), &role);
         env.events().publish(("role_changed", address, role), ());
     }
 
-    /// Get user role
     pub fn get_role(env: Env, address: Address) -> UserRole {
         env.storage().instance().get(&DataKey::Role(address)).unwrap_or(UserRole::User)
     }
 
-    /// Anchor proof of reserves (admin only)
-    pub fn anchor_reserves(env: Env, proof_hash: String, total_silver_grams: u64) {
+    pub fn update_fees(env: Env, issuance_bps: u32, storage_bps: u32, redemption_bps: u32, platform_bps: u32) {
         Self::require_admin(&env);
-
-        let reserves_data = ReservesData {
-            proof_hash,
-            total_silver_grams,
-            timestamp: env.ledger().timestamp(),
+        let fees = FeeConfig {
+            issuance_fee_bps: issuance_bps,
+            storage_fee_bps: storage_bps,
+            redemption_fee_bps: redemption_bps,
+            platform_fee_bps: platform_bps,
         };
-
-        env.storage().instance().set(&DataKey::ReservesProof, &reserves_data);
-        env.events().publish(("reserves_anchored", total_silver_grams), ());
+        env.storage().instance().set(&DataKey::FeeConfig, &fees);
+        env.events().publish(("fees_updated", issuance_bps, storage_bps, redemption_bps, platform_bps), ());
     }
 
-    /// Get current reserves proof
-    pub fn get_reserves_proof(env: Env) -> ReservesData {
-        env.storage().instance().get(&DataKey::ReservesProof).unwrap()
+    pub fn get_fees(env: Env) -> FeeConfig {
+        env.storage().instance().get(&DataKey::FeeConfig).unwrap()
     }
 
-    // Helper functions
+    pub fn set_paused(env: Env, paused: bool) {
+        Self::require_admin(&env);
+        env.storage().instance().set(&DataKey::Paused, &paused);
+        env.events().publish(("paused", paused), ());
+    }
+
+    pub fn upgrade(env: Env, new_wasm_hash: BytesN<32>) {
+        Self::require_admin(&env);
+        env.deployer().update_current_contract_wasm(new_wasm_hash);
+    }
 
     fn require_admin(env: &Env) {
         let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
         admin.require_auth();
     }
 
-
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use soroban_sdk::testutils::{Address as _, Env as _};
-
-    #[test]
-    fn test_initialize() {
-        let env = Env::default();
-        let admin = Address::generate(&env);
-
-        DSTToken::initialize(env.clone(), admin.clone());
-
-        let stored_admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
-        assert_eq!(stored_admin, admin);
-    }
-
-    #[test]
-    fn test_mint() {
-        let env = Env::default();
-        let admin = Address::generate(&env);
-        let user = Address::generate(&env);
-
-        DSTToken::initialize(env.clone(), admin.clone());
-
-        // Set admin as caller
-        env.mock_auths(&[admin.clone()]);
-
-        DSTToken::mint(env.clone(), user.clone(), 100, String::from_str(&env, "proof123"));
-
-        let balance = DSTToken::balance(env.clone(), user);
-        assert_eq!(balance, 100);
-
-        let total_supply = DSTToken::total_supply(env);
-        assert_eq!(total_supply, 100);
-    }
-
-    #[test]
-    fn test_transfer() {
-        let env = Env::default();
-        let admin = Address::generate(&env);
-        let from = Address::generate(&env);
-        let to = Address::generate(&env);
-
-        DSTToken::initialize(env.clone(), admin.clone());
-
-        // Set admin as caller for minting
-        env.mock_auths(&[admin.clone()]);
-        DSTToken::mint(env.clone(), from.clone(), 100, String::from_str(&env, "proof123"));
-
-        // Set from as caller for transfer
-        env.mock_auths(&[from.clone()]);
-        DSTToken::transfer(env.clone(), from.clone(), to.clone(), 50);
-
-        let from_balance = DSTToken::balance(env.clone(), from);
-        let to_balance = DSTToken::balance(env, to);
-
-        assert_eq!(from_balance, 50);
-        assert_eq!(to_balance, 50);
+    fn require_not_paused(env: &Env) {
+        let paused: bool = env.storage().instance().get(&DataKey::Paused).unwrap_or(false);
+        if paused {
+            panic!("Protocol is currently paused");
+        }
     }
 }

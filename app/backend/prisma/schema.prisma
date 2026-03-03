@@ -16,6 +16,7 @@ model User {
   twoFactorEnabled Boolean   @default(false)
   twoFactorSecret  String?
   amlStatus        AMLStatus @default(CLEARED)
+  googleId         String?   @unique
   amlDocument      String?
   createdAt        DateTime  @default(now())
 
@@ -35,6 +36,8 @@ model User {
   tradesAsUser       Trade[]             @relation("TradeUser")
   buyerTrades        Trade[]             @relation("TradeBuyer")
   sellerTrades       Trade[]             @relation("TradeSeller")
+  apiKeys            ApiKey[]
+  verifiedReceipts   VaultReceipt[]      @relation("ReceiptVerifier")
 }
 
 model KycRecord {
@@ -105,6 +108,35 @@ enum UserRole {
   ADMIN
   INDIA_USER
   INTERNATIONAL_USER
+  CUSTODY_VERIFIER
+  MINT_EXECUTOR
+  TREASURY_ADMIN
+  API_INTEGRATOR
+  ORACLE_SUBMITTER
+}
+
+// ─── Oracle Infrastructure ────────────────────────────────────────────────────
+
+model OraclePriceSubmission {
+  id             String   @id @default(uuid())
+  submitter      String                        // oracle keypair public key
+  pricePerGram   Float                         // computed median in USD/gram
+  rawPrice       Float                         // first source price
+  source         String                        // "metals.live+yahoo_finance" etc.
+  accepted       Boolean
+  rejectedReason String?
+  txHash         String?
+  submittedAt    DateTime @default(now())
+}
+
+model OracleStatus {
+  id             String   @id @default("singleton")
+  currentPrice   Float    @default(0)          // USD per gram
+  lastUpdatedAt  DateTime @default(now())
+  isPaused       Boolean  @default(false)
+  submitterCount Int      @default(1)
+  source         String   @default("Median Oracle")
+  updatedAt      DateTime @updatedAt
 }
 
 enum KycStatus {
@@ -128,6 +160,8 @@ enum OrderStatus {
 enum LoanStatus {
   PENDING_APPROVAL
   APPROVED
+  ACTIVE
+  REPAID
   REJECTED
   CLOSED
 }
@@ -147,18 +181,20 @@ enum AMLStatus {
 }
 
 model DSTMint {
-  id            String   @id @default(uuid())
-  userId        String
-  walletId      String
-  amount        Float
-  mintedAt      DateTime @default(now())
-  status        String   @default("PENDING")
-  txHash        String?
-  silverAssetId String?
+  id                String   @id @default(uuid())
+  userId            String
+  walletId          String
+  amount            Float
+  mintedAt          DateTime @default(now())
+  status            String   @default("PENDING")
+  txHash            String?
+  commodityAssetId  String?
+  settlementBatchId String?
 
-  user        User         @relation(fields: [userId], references: [id])
-  wallet      Wallet       @relation(fields: [walletId], references: [id])
-  silverAsset SilverAsset? @relation(fields: [silverAssetId], references: [id])
+  user            User             @relation(fields: [userId], references: [id])
+  wallet          Wallet           @relation(fields: [walletId], references: [id])
+  commodityAsset  CommodityAsset?  @relation(fields: [commodityAssetId], references: [id])
+  settlementBatch SettlementBatch? @relation(fields: [settlementBatchId], references: [id])
 }
 
 model Redemption {
@@ -222,25 +258,28 @@ model Kyc {
   user User @relation(fields: [userId], references: [id])
 }
 
-model SilverPrice {
-  id           String   @id @default(uuid())
-  price        Float
-  pricePerGram Float
-  currency     String?
-  setBy        String?
-  active       Boolean  @default(true)
-  setAt        DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model CommodityPrice {
+  id            String   @id @default(uuid())
+  commodityType String   @default("XAG")
+  price         Float
+  pricePerGram  Float
+  currency      String?
+  setBy         String?
+  active        Boolean  @default(true)
+  setAt         DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
-model SilverAsset {
-  id          String  @id @default(uuid())
-  weightGrams Float
-  purity      Float
-  location    String
-  vaultId     String
-  mint        String?
-  available   Boolean @default(true)
+model CommodityAsset {
+  id            String  @id @default(uuid())
+  commodityType String  @default("XAG")
+  issuerId      String?
+  weightGrams   Float
+  purity        Float
+  location      String
+  vaultId       String
+  mint          String?
+  available     Boolean @default(true)
 
   priceLocks PriceLock[]
   dstmints   DSTMint[]
@@ -248,9 +287,9 @@ model SilverAsset {
 
 model PriceLock {
   id            String   @id @default(uuid())
-  userId        String
-  silverAssetId String?
-  price         Float
+  userId           String
+  commodityAssetId String?
+  price            Float
   lockedPrice   Float?
   status        String   @default("ACTIVE")
   lockedAt      DateTime @default(now())
@@ -258,8 +297,8 @@ model PriceLock {
   createdAt     DateTime @default(now())
   usedForMint   Boolean  @default(false)
 
-  user        User         @relation(fields: [userId], references: [id])
-  silverAsset SilverAsset? @relation(fields: [silverAssetId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  commodityAsset CommodityAsset? @relation(fields: [commodityAssetId], references: [id])
 }
 
 model PurchaseOrder {
@@ -321,4 +360,86 @@ model SystemSettings {
   updatedBy   String?
   description String?
   updatedAt   DateTime @updatedAt
+}
+
+// --- Institutional Infrastructure Upgrades --- //
+
+model ApiKey {
+  id          String    @id @default(uuid())
+  userId      String
+  keyHash     String    @unique
+  name        String
+  permissions String[]
+  rateLimit   Int       @default(100)
+  isActive    Boolean   @default(true)
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model SettlementBatch {
+  id             String      @id @default(uuid())
+  batchId        String      @unique // String representation of on-chain u64
+  commodityType  String      @default("XAG")
+  vaultId        String
+  totalGrams     Float
+  porHash        String
+  status         BatchStatus @default(PENDING)
+  executedAt     DateTime?
+  createdAt      DateTime    @default(now())
+
+  mints          DSTMint[] 
+}
+
+enum BatchStatus {
+  PENDING
+  VERIFIED
+  EXECUTED
+  FAILED
+}
+
+model VaultReceipt {
+  id             String   @id @default(uuid())
+  receiptId      String   @unique
+  vaultId        String
+  vaultName      String?  // Human-readable vault name (e.g. "Brinks New York")
+  commodityType  String   @default("XAG")
+  gramsSecured   Float
+  verifierId     String
+  signature      String?
+  ipfsCid        String?  // IPFS CID of the immutable proof-of-reserve document
+  isUsed         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  verifier       User     @relation("ReceiptVerifier", fields: [verifierId], references: [id])
+}
+
+// --- SEP-24 Anchor Infrastructure --- //
+
+model AnchorTransaction {
+  id               String                  @id @default(uuid())
+  transactionId    String                  @unique // UUID returned to SEP-24 clients
+  stellarAccountId String
+  type             String                  // "deposit" or "withdrawal"
+  status           AnchorTransactionStatus @default(incomplete)
+  amount           Float?
+  amountExpected   Float?
+  assetCode        String                  @default("XAG")
+  bankReference    String?                 @unique
+  externalId       String?                 // External bank or system ID
+  message          String?
+  startedAt        DateTime                @default(now())
+  completedAt      DateTime?
+  updatedAt        DateTime                @updatedAt
+}
+
+enum AnchorTransactionStatus {
+  incomplete
+  pending_user_transfer_start
+  pending_external
+  pending_anchor
+  completed
+  error
 }

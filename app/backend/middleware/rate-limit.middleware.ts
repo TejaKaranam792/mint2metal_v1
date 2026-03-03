@@ -4,7 +4,7 @@ import slowDown from 'express-slow-down';
 // General rate limiter
 export const generalRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 500, // limit each IP to 500 requests per windowMs
   message: { error: 'Too many requests from this IP, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -13,7 +13,7 @@ export const generalRateLimit = rateLimit({
 // Speed limiter
 export const speedLimiter = slowDown({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  delayAfter: 50, // allow 50 requests per windowMs without delay
+  delayAfter: 200, // allow 200 requests per windowMs without delay
   delayMs: () => 500, // add 500ms of delay per request above delayAfter
 });
 

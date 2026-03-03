@@ -14,7 +14,7 @@ async function createAdminWallet() {
       }),
     });
 
-    const loginData = await loginResponse.json();
+    const loginData: any = await loginResponse.json();
     console.log('Admin login response:', loginData);
 
     if (!loginResponse.ok || !loginData.token) {

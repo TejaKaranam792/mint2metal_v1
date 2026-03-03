@@ -1,42 +1,58 @@
 import { prisma } from "../prisma";
 import { AuditService, AuditAction } from "./audit.service";
 
-export async function setSilverPrice(adminId: string, pricePerGram: number, currency: string = "USD") {
-  // Deactivate previous active price
-  await prisma.silverPrice.updateMany({
-    where: { active: true },
-    data: { active: false },
-  });
-
-  // Set new price
-  const newPrice = await prisma.silverPrice.create({
-    data: {
-      price: pricePerGram,
-      pricePerGram,
-      currency,
-      setBy: adminId,
-    },
-  });
-
-  // Log audit
-  await AuditService.logAction(
-    adminId,
-    AuditAction.ADMIN_ACTION,
-    "SET_SILVER_PRICE",
-    { pricePerGram, currency },
-    undefined,
-    undefined
-  );
-
-  return newPrice;
-}
-
+/**
+ * [ORACLE-POWERED] Get the current silver price from the decentralized oracle.
+ *
+ * Reads from the OracleStatus DB singleton (updated every 5 min by the oracle scheduler).
+ * Falls back to raw DB CommodityPrice table if the oracle has not been bootstrapped yet.
+ */
 export async function getCurrentSilverPrice() {
-  return prisma.silverPrice.findFirst({
+  // Prefer oracle-driven price (fast DB read, updated by oracle scheduler)
+  try {
+    const oracleStatus = await (prisma as any).oracleStatus.findUnique({
+      where: { id: "singleton" },
+    });
+
+    if (oracleStatus && oracleStatus.currentPrice > 0) {
+      const ageMs = Date.now() - new Date(oracleStatus.lastUpdatedAt).getTime();
+      return {
+        id: "oracle-singleton",
+        price: oracleStatus.currentPrice,
+        pricePerGram: oracleStatus.currentPrice,
+        currency: "USD",
+        setBy: "oracle",
+        active: !oracleStatus.isPaused,
+        isStale: ageMs > 3_600_000,
+        source: oracleStatus.source ?? "Median Oracle",
+        setAt: oracleStatus.lastUpdatedAt,
+        updatedAt: oracleStatus.lastUpdatedAt,
+        isPaused: oracleStatus.isPaused,
+      };
+    }
+  } catch {
+    // OracleStatus table may not exist yet before first migration
+  }
+
+  // Legacy fallback: return from CommodityPrice table
+  return prisma.commodityPrice.findFirst({
     where: { active: true },
     orderBy: { setAt: "desc" },
   });
 }
+
+/**
+ * @deprecated Admin manual price override is disabled.
+ * Prices are now exclusively determined by the decentralized OracleAggregator.
+ * This function will throw in production to prevent accidental centralized pricing.
+ */
+export async function setSilverPrice(adminId: string, pricePerGram: number, currency: string = "USD") {
+  throw new Error(
+    "Manual price override is disabled. Silver price is now controlled exclusively by the decentralized OracleAggregator contract. " +
+    "To update the price, ensure the oracle scheduler is running and has valid API keys configured."
+  );
+}
+
 
 export async function createSilverAsset(
   vaultId: string,
@@ -44,7 +60,7 @@ export async function createSilverAsset(
   purity: number,
   adminId?: string
 ) {
-  const asset = await prisma.silverAsset.create({
+  const asset = await prisma.commodityAsset.create({
     data: {
       vaultId,
       weightGrams,
@@ -69,12 +85,12 @@ export async function createSilverAsset(
 }
 
 export async function getVaultInventory() {
-  const assets = await prisma.silverAsset.findMany({
+  const assets = await prisma.commodityAsset.findMany({
     where: { mint: null }, // Not yet minted
     // No vault relation to include
   });
 
-  const totalWeight = assets.reduce((sum, asset) => sum + asset.weightGrams, 0);
+  const totalWeight = assets.reduce((sum: number, asset: any) => sum + asset.weightGrams, 0);
   const totalValue = totalWeight * 31.1035; // Troy ounce conversion, but we'll use current price
 
   return {
@@ -99,7 +115,7 @@ export async function checkMintEligibility() {
 // Price Locking Mechanism
 export async function lockPriceForUser(
   userId: string,
-  silverAssetId: string,
+  commodityAssetId: string,
   lockDurationMinutes: number = 15
 ) {
   const currentPrice = await getCurrentSilverPrice();
@@ -111,7 +127,7 @@ export async function lockPriceForUser(
   await prisma.priceLock.updateMany({
     where: {
       userId,
-      silverAssetId,
+      commodityAssetId,
       status: "ACTIVE",
     },
     data: { status: "CANCELLED" },
@@ -122,7 +138,7 @@ export async function lockPriceForUser(
   const priceLock = await prisma.priceLock.create({
     data: {
       userId,
-      silverAssetId,
+      commodityAssetId,
       price: currentPrice.pricePerGram,
       lockedPrice: currentPrice.pricePerGram,
       expiresAt,
@@ -154,7 +170,7 @@ export async function getActivePriceLocks(userId?: string) {
     where: whereClause,
     include: {
       user: true,
-      silverAsset: true,
+      commodityAsset: true,
     },
     orderBy: { lockedAt: "desc" },
   });
@@ -224,9 +240,10 @@ export async function updatePurchaseOrderStatus(
   const updateData: any = { status };
 
   if (status === "RECEIVED") {
-    updateData.receivedDate = new Date();
-    if (serialNumbers) updateData.serialNumbers = JSON.stringify(serialNumbers);
-    if (assayReports) updateData.assayReports = JSON.stringify(assayReports);
+    // The schema does not support receivedDate, serialNumbers, or assayReports
+    // updateData.receivedDate = new Date();
+    // if (serialNumbers) updateData.serialNumbers = JSON.stringify(serialNumbers);
+    // if (assayReports) updateData.assayReports = JSON.stringify(assayReports);
   }
 
   const purchaseOrder = await prisma.purchaseOrder.update({
@@ -234,19 +251,22 @@ export async function updatePurchaseOrderStatus(
     data: updateData,
   });
 
-  // If received, create silver assets
+  // If received, add silver into vault inventory
   if (status === "RECEIVED") {
-    // Create silver assets based on serial numbers
     const serials = serialNumbers || [];
-    for (const serial of serials) {
-      await createSilverAsset(
-        "default-vault", // TODO: Make this configurable
-        purchaseOrder.weightGrams / serials.length, // Distribute weight
-        0.999, // Standard purity
-        adminId
-      );
+
+    if (serials.length > 0) {
+      // Create one asset per bar/serial (weight distributed equally)
+      const weightPerBar = purchaseOrder.weightGrams / serials.length;
+      for (const serial of serials) {
+        await createSilverAsset(`order-${purchaseOrderId}`, weightPerBar, 0.999, adminId);
+      }
+    } else {
+      // No serial numbers — create one consolidated asset for the total order weight
+      await createSilverAsset(`order-${purchaseOrderId}`, purchaseOrder.weightGrams, 0.999, adminId);
     }
   }
+
 
   // Log audit
   await AuditService.logAction(

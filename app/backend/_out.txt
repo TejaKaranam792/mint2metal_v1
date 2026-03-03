@@ -1,0 +1,1 @@
+❌ error: rpc-url is used but network passphrase is missing, use `--network-passphrase` or `STELLAR_NETWORK_PASSPHRASE`

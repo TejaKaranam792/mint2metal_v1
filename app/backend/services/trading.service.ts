@@ -55,12 +55,12 @@ export class TradingService {
       // Validate user has wallet
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        include: { wallet: true, kycs: true }
+        include: { wallet: true }
       });
 
       if (!user) throw new Error('User not found');
       if (!user.wallet) throw new Error('User has no wallet');
-      if (!user.kycs || user.kycs.length === 0 || user.kycs[0].status !== 'VERIFIED') throw new Error('KYC not verified');
+      if (user.kycStatus !== 'VERIFIED') throw new Error('KYC not verified');
 
       // For sell orders, check if user has sufficient balance
       if (type === TradeType.SELL) {
@@ -255,6 +255,79 @@ export class TradingService {
       return { success: true };
     } catch (error) {
       this.logger.error('Failed to cancel trade intent', { error, intentId, userId });
+      throw error;
+    }
+  }
+
+  /**
+   * Execute Primary Issuance - Purchase from Treasury Buffer
+   * Used when users buy DST directly from the platform's pre-backed inventory.
+   */
+  async purchaseFromTreasury(
+    userId: string,
+    amount: number,
+    price: number
+  ) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { wallet: true }
+      });
+
+      if (!user?.wallet) throw new Error('User wallet not found');
+
+      // Execute transfer from the Treasury Buffer on ledger
+      const treasuryKeypair = Keypair.fromSecret(process.env.TREASURY_SECRET || process.env.ADMIN_PRIVATE_KEY!);
+
+      const txHash = await sorobanService.transferTokens(
+        treasuryKeypair,
+        user.wallet.address,
+        amount.toString()
+      );
+
+      // Create a direct intent representing the purchase
+      const intent = await prisma.tradeIntent.create({
+        data: {
+          userId,
+          type: TradeType.BUY,
+          amount,
+          price,
+          totalValue: amount * price,
+          status: IntentStatus.EXECUTED,
+          expiresAt: new Date(),
+          executedAt: new Date()
+        }
+      });
+
+      // Create a direct trade record representing the purchase
+      const trade = await prisma.trade.create({
+        data: {
+          userId,
+          intentId: intent.id,
+          buyerId: userId,
+          sellerId: 'TREASURY', // Representing the protocol buffer
+          type: TradeType.BUY,
+          amount,
+          price,
+          status: TradeStatus.EXECUTED
+        }
+      });
+
+      // Log the protocol treasury transfer
+      await prisma.auditLog.create({
+        data: {
+          userId,
+          action: 'TREASURY_BUFFER_PURCHASE',
+          reference: trade.id,
+          details: JSON.stringify({ amount, txHash })
+        }
+      });
+
+      this.logger.info('Processed purchase from Treasury Buffer', { userId, amount, txHash });
+      return trade;
+
+    } catch (error) {
+      this.logger.error('Failed purchase from Treasury Buffer', { error, userId, amount });
       throw error;
     }
   }
