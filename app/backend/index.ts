@@ -1,4 +1,7 @@
-﻿import express from 'express';
+import dns from 'dns';
+dns.setDefaultResultOrder('ipv4first'); // Force IPv4 to fix ENETUNREACH on Supabase
+
+import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import authRoutes from './routes/auth';
