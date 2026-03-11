@@ -85,7 +85,7 @@ router.get("/my", authenticateToken, async (req: AuthenticatedRequest, res: expr
 // POST /orders/:id/confirm
 router.post("/:id/confirm", authenticateToken, async (req: AuthenticatedRequest, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const userId = req.user!.userId;
     console.log(`[Confirm Order API] Received confirm request for orderId: ${id}, req.body:`, req.body);
 

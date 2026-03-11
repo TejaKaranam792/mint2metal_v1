@@ -52,7 +52,7 @@ const reservesSchema = z.object({
 // Get token balance
 router.get("/balance/:address", async (req, res) => {
   try {
-    const { address } = req.params;
+    const address = req.params.address as string;
     const balance = await sorobanService.getBalance(address);
     res.json({ balance });
   } catch (error) {

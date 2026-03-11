@@ -138,7 +138,7 @@ router.get("/admin/loan-requests", requireAdmin, async (req, res) => {
 });
 
 router.post("/admin/loan-requests/:id/approve", requireAdmin, async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   try {
     const loan = await prisma.loanRequest.findUnique({
@@ -185,7 +185,7 @@ router.post("/admin/loan-requests/:id/approve", requireAdmin, async (req, res) =
 });
 
 router.post("/admin/loan-requests/:id/reject", requireAdmin, async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   try {
     const loan = await prisma.loanRequest.findUnique({

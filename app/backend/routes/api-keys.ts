@@ -83,7 +83,7 @@ router.post("/generate", authenticateTokenOrApiKey, async (req: any, res) => {
 router.delete("/:id", authenticateTokenOrApiKey, async (req: any, res) => {
   try {
     const userId = req.user.userId || req.user.id;
-    const keyId = req.params.id;
+    const keyId = (req.params.id as string);
     const role = req.user.role;
 
     const { prisma } = await import("../prisma");

@@ -274,7 +274,7 @@ router.get("/orders/:id", requireApiKey, async (req: any, res) => {
   try {
     const userId = req.apiKey.userId;
     const order = await prisma.order.findFirst({
-      where: { id: req.params.id, userId },
+      where: { id: (req.params.id as string), userId },
     });
 
     if (!order)

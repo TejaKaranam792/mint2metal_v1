@@ -81,7 +81,7 @@ router.get("/my", authenticateToken, async (req, res) => {
 // Admin: POST /admin/redemption/:id/approve
 router.post("/:id/approve", requireAdmin, async (req: AuthenticatedRequest, res: express.Response) => {
   try {
-    const result = await approveRedemption(req.user!.userId, req.params.id);
+    const result = await approveRedemption(req.user!.userId, (req.params.id as string));
     res.json(result);
   } catch (error) {
     console.error(error);
@@ -96,7 +96,7 @@ router.post("/:id/ship", requireAdmin, async (req: AuthenticatedRequest, res: ex
     if (!trackingNumber) {
       return res.status(400).json({ success: false, message: "Tracking number is required" });
     }
-    const result = await shipRedemption(req.user!.userId, req.params.id, trackingNumber);
+    const result = await shipRedemption(req.user!.userId, (req.params.id as string), trackingNumber);
     res.json(result);
   } catch (error) {
     console.error(error);
@@ -107,7 +107,7 @@ router.post("/:id/ship", requireAdmin, async (req: AuthenticatedRequest, res: ex
 // Admin: POST /admin/redemption/:id/reject
 router.post("/:id/reject", requireAdmin, async (req: AuthenticatedRequest, res: express.Response) => {
   try {
-    const result = await rejectRedemption(req.params.id);
+    const result = await rejectRedemption((req.params.id as string));
     res.json(result);
   } catch (error) {
     console.error(error);

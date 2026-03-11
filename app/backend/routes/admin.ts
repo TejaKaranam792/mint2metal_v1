@@ -76,7 +76,7 @@ router.get("/users", requireAdmin, async (req, res) => {
 
 // Update user role (for admin management)
 router.post("/user/:id/role", requireAdmin, async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { role } = req.body;
 
   try {
@@ -147,7 +147,7 @@ router.get("/analytics", requireAdmin, async (req, res) => {
 
 // Update transaction status (for admin approval/rejection)
 router.post("/transaction/:id/status", requireAdmin, async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { status } = req.body;
 
   try {
@@ -242,7 +242,7 @@ router.post("/purchase-order", requireAdmin, async (req, res) => {
 
 router.post("/purchase-order/:id/status", requireAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { status, serialNumbers, assayReports } = req.body;
     const order = await updatePurchaseOrderStatus(req.user.id, id, status, serialNumbers, assayReports);
     res.json({ message: "Purchase order status updated", order });
@@ -257,7 +257,7 @@ router.post("/purchase-order/:id/status", requireAdmin, async (req, res) => {
 // Orders admin endpoints
 router.post("/orders/:id/settle", requireAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const result = await settleOrder(id);
     res.json(result);
   } catch (error) {
@@ -268,7 +268,7 @@ router.post("/orders/:id/settle", requireAdmin, async (req, res) => {
 
 router.post("/orders/:id/reject", requireAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const result = await rejectOrder(id);
     res.json(result);
   } catch (error) {
@@ -281,7 +281,7 @@ router.post("/orders/:id/reject", requireAdmin, async (req, res) => {
 
 // Redemption Management
 router.post("/redemption/:id/approve", requireAdmin, async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { force } = req.body; // Allow admin to force approve even if burn fails
 
   try {
@@ -296,7 +296,7 @@ router.post("/redemption/:id/approve", requireAdmin, async (req, res) => {
 });
 
 router.post("/redemption/:id/execute", requireAdmin, async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { adminSecret } = req.body;
 
   try {
@@ -309,7 +309,7 @@ router.post("/redemption/:id/execute", requireAdmin, async (req, res) => {
 });
 
 router.post("/redemption/:id/dispatch", requireAdmin, async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { trackingNumber } = req.body;
 
   try {
@@ -377,7 +377,7 @@ router.get("/redemptions", requireAdmin, async (req, res) => {
 
 // Admin Controls
 router.post("/user/:id/freeze", requireAdmin, async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { frozen } = req.body;
 
   try {

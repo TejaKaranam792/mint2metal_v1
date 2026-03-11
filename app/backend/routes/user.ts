@@ -245,7 +245,7 @@ router.get("/pending-aml", authenticateToken, async (req: AuthenticatedRequest, 
 // Approve AML (admin only)
 router.post("/approve-aml/:userId", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { userId } = req.params;
+    const userId = req.params.userId as string;
     const adminId = req.user!.userId;
 
     // Check if requester is admin
