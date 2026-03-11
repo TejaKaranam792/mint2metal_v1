@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "npx prisma generate --schema=backend/prisma/schema.prisma && next build",
-    "build:backend": "npx prisma generate --schema=backend/prisma/schema.prisma && npx tsc --project backend/tsconfig.json",
+    "build:backend": "npm install && npx prisma generate --schema=backend/prisma/schema.prisma && npx tsc --project backend/tsconfig.json",
     "start": "next start",
     "start:backend": "node backend/dist/index.js",
     "lint": "eslint"
