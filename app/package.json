@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate --schema=backend/prisma/schema.prisma && next build",
+    "build:backend": "prisma generate --schema=backend/prisma/schema.prisma && tsc --project backend/tsconfig.json",
     "start": "next start",
+    "start:backend": "node backend/dist/index.js",
     "lint": "eslint"
   },
   "dependencies": {
