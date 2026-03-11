@@ -42,7 +42,7 @@
   ],
   "exclude": [
     "node_modules",
-    "app/landing",
-    "app/landing/**"
+    "app/_landing",
+    "app/_landing/**"
   ]
 }

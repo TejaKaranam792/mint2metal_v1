@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   turbopack: {},
   // Prevent Next.js from tracing/bundling files from the nested landing sub-project
   outputFileTracingExcludes: {
-    "*": ["./app/landing/**/*"],
+    "*": ["./app/_landing/**/*"],
   },
 };
 
