@@ -164,7 +164,8 @@ router.get("/prices/:commodity", authenticateTokenOrApiKey, async (req: Authenti
  */
 router.get("/transparency/:commodity", authenticateTokenOrApiKey, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const report = await TransparencyService.generateReconciliationReport(req.params.commodity);
+    const commodityParam = req.params.commodity as string;
+    const report = await TransparencyService.generateReconciliationReport(commodityParam);
     let lastPor = await prisma.systemSettings.findUnique({
       where: { key: "LATEST_POR_CID" }
     });
@@ -173,7 +174,7 @@ router.get("/transparency/:commodity", authenticateTokenOrApiKey, async (req: Au
     let displayCid = lastPor?.value;
     if (!displayCid) {
       const latestReceipt = await prisma.vaultReceipt.findFirst({
-        where: { commodityType: req.params.commodity, isUsed: true, ipfsCid: { not: null } },
+        where: { commodityType: commodityParam, isUsed: true, ipfsCid: { not: null } },
         orderBy: { createdAt: 'desc' }
       });
       displayCid = latestReceipt?.ipfsCid || "N/A";
