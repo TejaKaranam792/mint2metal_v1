@@ -1,5 +1,5 @@
 import { sorobanService } from "./services/soroban.service";
-import { Keypair, Asset, Contract, TransactionBuilder } from "@stellar/stellar-sdk";
+import { Keypair, Asset, Contract, TransactionBuilder, Operation } from "@stellar/stellar-sdk";
 import * as dotenv from "dotenv";
 import fs from "fs";
 
@@ -26,7 +26,7 @@ async function main() {
     const account = await server.getAccount(adminKeypair.publicKey());
 
     // Create the wrap operation
-    const op = Contract.deployStellarAsset(xagAsset);
+    const op = Operation.createStellarAssetContract({ asset: xagAsset });
 
     const tx = new TransactionBuilder(account, {
       fee: '100000',
