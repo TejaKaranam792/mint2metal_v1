@@ -1,0 +1,191 @@
+﻿On branch master
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   .gitignore
+	new file:   app/add-submitter.mjs
+	deleted:    app/app/admin/page.tsx
+	modified:   app/app/auth/login/page.tsx
+	modified:   app/app/auth/signup/page.tsx
+	modified:   app/app/components/Footer.tsx
+	modified:   app/app/components/Navbar.tsx
+	new file:   app/app/components/OraclePriceBanner.tsx
+	modified:   app/app/components/Sidebar.tsx
+	modified:   app/app/context/WalletContext.tsx
+	deleted:    app/app/dashboard/2fa/page.tsx
+	deleted:    app/app/dashboard/balance/page.tsx
+	deleted:    app/app/dashboard/kyc/page.tsx
+	deleted:    app/app/dashboard/loans/page.tsx
+	deleted:    app/app/dashboard/page.tsx
+	deleted:    app/app/dashboard/physical/page.tsx
+	deleted:    app/app/dashboard/redemption/page.tsx
+	deleted:    app/app/dashboard/silver/page.tsx
+	deleted:    app/app/dashboard/trading/page.tsx
+	modified:   app/app/globals.css
+	modified:   app/app/landing/app/page.tsx
+	modified:   app/app/landing/components/sections/collection-section.tsx
+	modified:   app/app/landing/components/sections/featured-products-section.tsx
+	modified:   app/app/landing/tsconfig.json
+	modified:   app/app/layout.tsx
+	modified:   app/app/lib/api.ts
+	modified:   app/app/lib/auth-context.tsx
+	new file:   app/app/lib/constants.ts
+	modified:   app/app/lib/mockUser.ts
+	modified:   app/app/lib/signDummyTx.ts
+	modified:   app/app/lib/stellar.ts
+	modified:   app/app/lib/stellarWallet.ts
+	modified:   app/app/page.tsx
+	modified:   app/backend/.env
+	new file:   app/backend/SDK_USAGE.md
+	new file:   app/backend/_clawback_inner.cjs
+	new file:   app/backend/_out.txt
+	deleted:    app/backend/add_silver_assets.ts
+	new file:   app/backend/balance-result.txt
+	new file:   app/backend/cb-hash.txt
+	new file:   app/backend/cb.json
+	new file:   app/backend/cbs-new.json
+	new file:   app/backend/cbs.json
+	new file:   app/backend/check-asset.ts
+	new file:   app/backend/check-asset2.js
+	new file:   app/backend/check-balance.ts
+	new file:   app/backend/check-direct.js
+	new file:   app/backend/check-keys.js
+	new file:   app/backend/check-treasury-balance.js
+	new file:   app/backend/check-ts.ts
+	deleted:    app/backend/check_silver_assets.ts
+	new file:   app/backend/check_treasury.cjs
+	new file:   app/backend/check_user_cbs.cjs
+	new file:   app/backend/clawback-response.json
+	new file:   app/backend/clawback-result.txt
+	new file:   app/backend/clawback-setup-result.txt
+	modified:   app/backend/create-admin.ts
+	modified:   app/backend/create_admin_wallet.ts
+	deleted:    app/backend/create_silver_assets.ts
+	new file:   app/backend/deploy-dst.mjs
+	new file:   app/backend/deploy-dst.ts
+	new file:   app/backend/deploy-raw.mjs
+	new file:   app/backend/direct-setup-result.txt
+	new file:   app/backend/do-fix.ps1
+	new file:   app/backend/do-setup.ps1
+	new file:   app/backend/enable-clawback.mjs
+	new file:   app/backend/final-result.json
+	new file:   app/backend/fix-asset-direct.js
+	new file:   app/backend/fix-asset.ts
+	new file:   app/backend/fix-issuer.js
+	new file:   app/backend/fix-mint-db.ts
+	new file:   app/backend/fix-user.ts
+	new file:   app/backend/fix.cjs
+	new file:   app/backend/fixdb.cjs
+	new file:   app/backend/get-token.ts
+	new file:   app/backend/get_cbs.cjs
+	new file:   app/backend/horizon.json
+	modified:   app/backend/index.ts
+	new file:   app/backend/keys.txt
+	new file:   app/backend/middleware/auth.middleware.ts
+	modified:   app/backend/middleware/rate-limit.middleware.ts
+	new file:   app/backend/mint_cb.cjs
+	new file:   app/backend/mint_test.cjs
+	deleted:    app/backend/output_duplicates.js
+	modified:   app/backend/package-lock.json
+	modified:   app/backend/package.json
+	new file:   app/backend/prisma/migrations/20260228_add_oracle_tables/migration.sql
+	modified:   app/backend/prisma/schema.prisma
+	new file:   app/backend/probe.cjs
+	modified:   app/backend/routes/admin.ts
+	new file:   app/backend/routes/api-keys.ts
+	new file:   app/backend/routes/api-v1.ts
+	new file:   app/backend/routes/asset.ts
+	modified:   app/backend/routes/auth.ts
+	new file:   app/backend/routes/b2b.ts
+	new file:   app/backend/routes/bank.ts
+	modified:   app/backend/routes/kyc.ts
+	modified:   app/backend/routes/loans.ts
+	modified:   app/backend/routes/mint.ts
+	new file:   app/backend/routes/oracle.ts
+	modified:   app/backend/routes/orders.ts
+	modified:   app/backend/routes/redemption.ts
+	new file:   app/backend/routes/sep10.ts
+	new file:   app/backend/routes/sep24.ts
+	new file:   app/backend/routes/stellar-toml.ts
+	modified:   app/backend/routes/trading.ts
+	modified:   app/backend/routes/user.ts
+	new file:   app/backend/run-sim.ts
+	new file:   app/backend/run_api_test.ts
+	new file:   app/backend/scripts/check-and-fund.mjs
+	new file:   app/backend/scripts/create-oracle-tables.ts
+	modified:   app/backend/scripts/deploy-contracts.ts
+	new file:   app/backend/scripts/finalize-init.mjs
+	new file:   app/backend/scripts/fund-treasury.mjs
+	new file:   app/backend/scripts/manual-mint.mjs
+	new file:   app/backend/scripts/test-route.mjs
+	new file:   app/backend/scripts/verify-fixes.mjs
+	new file:   app/backend/seed_price.ts
+	new file:   app/backend/services/api-key.service.ts
+	modified:   app/backend/services/auth.service.ts
+	modified:   app/backend/services/kyc.service.ts
+	deleted:    app/backend/services/mint.service.ts
+	new file:   app/backend/services/oracle-scheduler.service.ts
+	new file:   app/backend/services/oracle.service.ts
+	modified:   app/backend/services/redemption.service.ts
+	modified:   app/backend/services/silver.service.ts
+	modified:   app/backend/services/soroban.service.ts
+	new file:   app/backend/services/sumsub.service.ts
+	modified:   app/backend/services/trading.service.ts
+	new file:   app/backend/services/transparency.service.ts
+	modified:   app/backend/services/wallet.service.ts
+	modified:   app/backend/services/websocket.service.ts
+	new file:   app/backend/setup-clawback-output.txt
+	new file:   app/backend/setup-clawback.cjs
+	new file:   app/backend/setup-clawback.mjs
+	new file:   app/backend/setup-error.txt
+	new file:   app/backend/setup-result.json
+	new file:   app/backend/setup_clawback_final.ts
+	deleted:    app/backend/setup_mint_data.ts
+	modified:   app/backend/soroban.log
+	new file:   app/backend/test-mint.js
+	new file:   app/backend/test-prisma.ts
+	new file:   app/backend/test-py.py
+	new file:   app/backend/test_b2b.ts
+	modified:   app/backend/test_mint_api.ts
+	deleted:    app/backend/test_mint_intent.ts
+	new file:   app/backend/treasury-flags.json
+	new file:   app/backend/treasury.json
+	new file:   app/backend/trigger-wrap.js
+	new file:   app/backend/user_cb.json
+	deleted:    app/backend/view_silver_assets.ts
+	modified:   app/backend/wallet.log
+	new file:   app/backend/wrap-asset.ts
+	new file:   app/backend/wrap-asset2.js
+	new file:   app/check-contract.mjs
+	modified:   app/contracts/dst-token/Cargo.toml
+	new file:   app/contracts/dst-token/build_output.txt
+	new file:   app/contracts/dst-token/build_output2.txt
+	new file:   app/contracts/dst-token/deploy_output.txt
+	new file:   app/contracts/dst-token/deploy_output2.txt
+	new file:   app/contracts/dst-token/output.txt
+	modified:   app/contracts/dst-token/src/lib.rs
+	modified:   app/contracts/loan-contract/Cargo.toml
+	new file:   app/contracts/loan-contract/deploy_output.txt
+	new file:   app/contracts/oracle-aggregator/Cargo.lock
+	new file:   app/contracts/oracle-aggregator/Cargo.toml
+	new file:   app/contracts/oracle-aggregator/src/lib.rs
+	new file:   app/deploy-oracle.mjs
+	modified:   app/package-lock.json
+	modified:   app/package.json
+	new file:   app/re-init.mjs
+	new file:   app/run-sim-native.mjs
+	new file:   app/run-sim.mjs
+	new file:   app/sim_result.txt
+	new file:   app/simulate-oracle.mjs
+	new file:   app/submitters.json
+	modified:   app/tailwind.config.ts
+	new file:   app/test-api.mjs
+	modified:   app/tsconfig.tsbuildinfo
+	new file:   git_status_staged.txt
+	new file:   git_status_staged_utf8.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	git_status_final.txt
+	git_status_final_2.txt
+	git_status_final_utf8.txt
+
