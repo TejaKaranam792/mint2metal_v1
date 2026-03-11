@@ -89,7 +89,7 @@ router.post("/transfer", async (req, res) => {
     const { fromSecret, to, amount } = transferSchema.parse(req.body);
 
     const txHash = await sorobanService.transferTokens(
-      require("stellar-sdk").Keypair.fromSecret(fromSecret),
+      require("@stellar/stellar-sdk").Keypair.fromSecret(fromSecret),
       to,
       amount
     );
@@ -113,7 +113,7 @@ router.post("/freeze", requireAdmin, async (req, res) => {
     const { adminSecret, address, frozen } = freezeSchema.parse(req.body);
 
     const txHash = await sorobanService.setFreezeStatus(
-      require("stellar-sdk").Keypair.fromSecret(adminSecret),
+      require("@stellar/stellar-sdk").Keypair.fromSecret(adminSecret),
       address,
       frozen
     );
@@ -137,7 +137,7 @@ router.post("/role", requireAdmin, async (req, res) => {
     const { adminSecret, address, role } = roleSchema.parse(req.body);
 
     const txHash = await sorobanService.setUserRole(
-      require("stellar-sdk").Keypair.fromSecret(adminSecret),
+      require("@stellar/stellar-sdk").Keypair.fromSecret(adminSecret),
       address,
       role as any
     );
@@ -161,7 +161,7 @@ router.post("/reserves", requireAdmin, async (req, res) => {
     const { adminSecret, proofHash, totalSilverGrams } = reservesSchema.parse(req.body);
 
     const txHash = await sorobanService.anchorReservesProof(
-      require("stellar-sdk").Keypair.fromSecret(adminSecret),
+      require("@stellar/stellar-sdk").Keypair.fromSecret(adminSecret),
       proofHash,
       totalSilverGrams
     );
