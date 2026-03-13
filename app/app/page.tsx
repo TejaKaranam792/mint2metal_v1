@@ -160,50 +160,48 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Segment */}
+      {/* What We Do Section */}
       <section className="py-24 px-8 max-w-7xl mx-auto border-t border-border-subtle">
         <div className="flex flex-col md:flex-row gap-16 items-center">
           
-          <div className="md:w-1/3 flex gap-8">
-            {/* Dots */}
-            <div className="flex flex-col gap-4 mt-2">
-              {carouselSlides.map((_, idx) => (
-                <div 
-                  key={idx}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`w-4 h-4 rounded-full border cursor-pointer transition-colors ${currentSlide === idx ? 'border-primary bg-primary' : 'border-border-strong hover:border-primary/50'}`}
-                ></div>
-              ))}
+          <div className="md:w-1/2">
+            <h2 className="text-4xl md:text-5xl font-bold text-primary mb-6 leading-tight">
+              Bridging the Gap Between <br/> Vaults and Blockchain.
+            </h2>
+            <p className="text-secondary-text text-lg mb-8 leading-relaxed">
+              Mint2Metal provides a robust, institutional-grade infrastructure for the tokenization of real-world assets. We specialize in bringing physical silver and other precious metals onto the Stellar network, ensuring 1:1 backing, real-time auditing, and seamless fractional ownership.
+            </p>
+            <div className="space-y-4 mb-10">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0 mt-1">✓</div>
+                <p className="text-primary-text/80">LBMA-certified physical commodity backing</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0 mt-1">✓</div>
+                <p className="text-primary-text/80">Automated Proof of Reserve (PoR) protocols</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0 mt-1">✓</div>
+                <p className="text-primary-text/80">Enterprise-grade API & Smart Contract rails</p>
+              </div>
             </div>
-            
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold text-primary mb-6 leading-tight">
-                Tokenize metals, <br/> effortlessly.
-              </h2>
-              <p className="text-secondary-text text-lg mb-10 leading-relaxed font-medium">
-                Mint2Metal provides a robust API and smart contract infrastructure for seamless token issuance, lifecycle management, and auditing of real-world assets on the Stellar network.
-              </p>
-              <button className="bg-primary text-background px-8 py-3 rounded-full font-bold hover:bg-primary-strong transition-colors text-lg shadow-[0_0_20px_rgba(226,232,240,0.2)]">
-                Explore APIs
-              </button>
-            </div>
+            <button className="bg-primary text-background px-8 py-3 rounded-full font-bold hover:bg-primary-strong transition-colors text-lg shadow-[0_0_20px_rgba(226,232,240,0.2)]">
+              Explore Our Infrastructure
+            </button>
           </div>
 
-          <div className="md:w-2/3">
-             <div className="rounded-2xl border border-primary/30 overflow-hidden bg-surface flex flex-col h-[500px]">
-                <div className="h-1/2 relative bg-black">
-                  <Image
-                    src={carouselSlides[currentSlide].image}
-                    alt={carouselSlides[currentSlide].title}
-                    fill
-                    className="object-cover transition-opacity duration-500"
-                  />
-                </div>
-                <div className="h-1/2 p-10 flex flex-col justify-center text-center bg-gradient-to-t from-surface to-surface-elevated">
-                  <h3 className="text-3xl font-bold mb-4 whitespace-pre-line">{carouselSlides[currentSlide].title}</h3>
-                  <p className="text-secondary-text text-lg max-w-md mx-auto">
-                    {carouselSlides[currentSlide].description}
-                  </p>
+          <div className="md:w-1/2">
+             <div className="rounded-3xl border border-primary/30 overflow-hidden bg-surface shadow-2xl relative h-[500px]">
+                <Image
+                  src="/easy_to_transport.png"
+                  alt="Mint2Metal Security"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
+                <div className="absolute bottom-8 left-8 right-8 p-6 glass-pill border border-white/10 rounded-2xl backdrop-blur-md">
+                   <div className="text-sm font-bold text-primary mb-1 uppercase tracking-widest">Our Mission</div>
+                   <div className="text-lg font-medium text-white">Democratizing access to precious metals through secure, transparent, and scalable blockchain technology.</div>
                 </div>
              </div>
           </div>
