@@ -5,28 +5,38 @@ import Image from "next/image";
 import { useState } from "react";
 
 export default function Home() {
-  const [activeFeature, setActiveFeature] = useState(0);
+  // Carousel state for the "Pioneering RWA" section
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-  const features = [
+  const carouselSlides = [
     {
-      title: "Seamless Integration",
-      description:
-        "Easily integrate tokenized metal assets into your application using our developer-friendly APIs and robust smart contract architecture.",
-      image: "/easy_to_transport.png" // Placeholder for actual graphic
+      title: "Enterprise-Grade \nAsset Tokenization",
+      description: "Our infrastructure enables seamless tokenization, storage auditing, and fractional ownership of real-world assets, starting with precious metals. We bridge the gap between traditional vaulting and decentralized finance.",
+      image: "/store_of_value_hand.png"
     },
     {
-      title: "Transparent Auditing",
-      description:
-        "Provide your users with real-time proofs of reserve. Our system continuously verifies on-chain tokens against vault holdings.",
-      image: "/easy_to_transport.png" // Placeholder
+      title: "Fractional Ownership \nof Precious Metals",
+      description: "Democratizing access to high-value assets. Investors can own portions of LBMA-certified bullion bars, making gold and silver investment accessible to everyone, anywhere.",
+      image: "/gold_fractional_ownership.png"
     },
     {
-      title: "Institutional Security",
-      description:
-        "Built on the proven, enterprise-grade Stellar network, ensuring fast, affordable, and secure asset issuance and compliance.",
-      image: "/easy_to_transport.png" // Placeholder
+      title: "Institutional-Level \nSecurity & Compliance",
+      description: "Your assets are secured in world-class vaults (Brinks/Malca-Amit) with full insurance and multi-sig security. We adhere to the highest global compliance standards for RWA issuance.",
+      image: "/vault_security.png"
+    },
+    {
+      title: "Real-Time \nProof of Reserves",
+      description: "Unparalleled transparency. Every digital token is backed by a physically audited gram of precious metal, with real-time on-chain verification of our vault holdings.",
+      image: "/proof_of_reserves.png"
     }
   ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [carouselSlides.length]);
 
   return (
     <div className="min-h-screen bg-background text-primary-text font-sans overflow-x-hidden">
@@ -108,35 +118,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Store of Value Section */}
+      {/* Store of Value Section (Carousel) */}
       <section className="py-24 px-8 max-w-7xl mx-auto relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 text-5xl md:text-8xl font-black text-white/5 blur-sm z-0 text-center w-full mt-10">
           Pioneering RWA <br/> Tokenization
         </div>
         
-        <div className="relative z-10 rounded-3xl border border-primary/30 overflow-hidden flex flex-col md:flex-row bg-surface/50 backdrop-blur-sm mt-16 max-w-5xl mx-auto">
-          <div className="md:w-1/2 h-64 md:h-[400px] relative bg-black">
-             <Image
-              src="/store_of_value_hand.png"
-              alt="Placing silver in safe"
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-surface/90"></div>
-          </div>
-          <div className="md:w-1/2 p-10 md:p-16 flex flex-col justify-center">
-            <h2 className="text-3xl font-bold mb-6">Enterprise-Grade <br/> Asset Tokenization</h2>
-            <p className="text-secondary-text leading-relaxed text-lg">
-              Our infrastructure enables seamless tokenization, storage auditing, and fractional ownership of real-world assets, starting with precious metals. We bridge the gap between traditional vaulting and decentralized finance.
-            </p>
+        <div className="relative z-10 rounded-3xl border border-primary/30 overflow-hidden bg-surface/50 backdrop-blur-sm mt-16 max-w-5xl mx-auto min-h-[400px]">
+          <div className="flex transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+            {carouselSlides.map((slide, index) => (
+              <div key={index} className="min-w-full flex flex-col md:flex-row">
+                <div className="md:w-1/2 h-64 md:h-[400px] relative bg-black">
+                  <Image
+                    src={slide.image}
+                    alt={slide.title}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent to-surface/90"></div>
+                </div>
+                <div className="md:w-1/2 p-10 md:p-16 flex flex-col justify-center">
+                  <h2 className="text-3xl font-bold mb-6 whitespace-pre-line">{slide.title}</h2>
+                  <p className="text-secondary-text leading-relaxed text-lg">
+                    {slide.description}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Carousel indicators (mock) */}
+        {/* Carousel indicators */}
         <div className="flex justify-center gap-3 mt-8">
-          <div className="w-3 h-3 rounded-full border border-primary bg-primary cursor-pointer"></div>
-          <div className="w-3 h-3 rounded-full border border-primary/50 cursor-pointer hover:border-primary"></div>
-          <div className="w-3 h-3 rounded-full border border-primary/50 cursor-pointer hover:border-primary"></div>
+          {carouselSlides.map((_, index) => (
+            <div 
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-3 h-3 rounded-full border border-primary transition-all duration-300 cursor-pointer ${currentSlide === index ? 'bg-primary scale-125' : 'bg-transparent opacity-50 hover:opacity-100'}`}
+            ></div>
+          ))}
         </div>
       </section>
 
@@ -147,11 +167,11 @@ export default function Home() {
           <div className="md:w-1/3 flex gap-8">
             {/* Dots */}
             <div className="flex flex-col gap-4 mt-2">
-              {features.map((_, idx) => (
+              {carouselSlides.map((_, idx) => (
                 <div 
                   key={idx}
-                  onClick={() => setActiveFeature(idx)}
-                  className={`w-4 h-4 rounded-full border cursor-pointer transition-colors ${activeFeature === idx ? 'border-primary bg-primary' : 'border-border-strong hover:border-primary/50'}`}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`w-4 h-4 rounded-full border cursor-pointer transition-colors ${currentSlide === idx ? 'border-primary bg-primary' : 'border-border-strong hover:border-primary/50'}`}
                 ></div>
               ))}
             </div>
@@ -173,16 +193,16 @@ export default function Home() {
              <div className="rounded-2xl border border-primary/30 overflow-hidden bg-surface flex flex-col h-[500px]">
                 <div className="h-1/2 relative bg-black">
                   <Image
-                    src={features[activeFeature].image}
-                    alt={features[activeFeature].title}
+                    src={carouselSlides[currentSlide].image}
+                    alt={carouselSlides[currentSlide].title}
                     fill
                     className="object-cover transition-opacity duration-500"
                   />
                 </div>
                 <div className="h-1/2 p-10 flex flex-col justify-center text-center bg-gradient-to-t from-surface to-surface-elevated">
-                  <h3 className="text-3xl font-bold mb-4">{features[activeFeature].title}</h3>
+                  <h3 className="text-3xl font-bold mb-4 whitespace-pre-line">{carouselSlides[currentSlide].title}</h3>
                   <p className="text-secondary-text text-lg max-w-md mx-auto">
-                    {features[activeFeature].description}
+                    {carouselSlides[currentSlide].description}
                   </p>
                 </div>
              </div>
