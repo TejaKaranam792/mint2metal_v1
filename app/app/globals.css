@@ -23,19 +23,19 @@
 @layer base {
   :root {
     /* Premium Dark/Silver Theme */
-    --background: #020617; /* slate-950 */
-    --surface: #0f172a; /* slate-900 */
-    --elevated-surface: #1e293b; /* slate-800 */
-    --border: #334155; /* slate-700 */
+    --background: #0c0c0c; 
+    --surface: #111111; 
+    --elevated-surface: #1a1a1a; 
+    --border: #262626; 
     
-    --primary-text: #f8fafc; /* slate-50 */
-    --secondary-text: #94a3b8; /* slate-400 */
-    --muted-text: #64748b; /* slate-500 */
+    --primary-text: #fdfdfd; 
+    --secondary-text: #a3a3a3; 
+    --muted-text: #737373; 
     
-    --primary: #f1f5f9; /* slate-100 (Silver) */
-    --accent: #38bdf8; /* sky-400 (Mint/Tech glow) */
-    --secondary: #1e293b;
-    --muted: #0f172a;
+    --primary: #e2e8f0; /* m2m silver */
+    --accent: #38bdf8; /* Mint/Tech glow */
+    --secondary: #171717;
+    --muted: #0f0f0f;
     
     --success: #10b981;
     --error: #ef4444;
@@ -53,7 +53,7 @@
   html {
     scroll-behavior: smooth;
   }
-}
+
 
 /* Animations from old globals.css */
 @keyframes slideUp {
@@ -196,4 +196,6 @@
 
 @layer utilities {
   .container { @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8; }
+}
+
 }

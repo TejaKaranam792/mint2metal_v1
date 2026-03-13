@@ -24,43 +24,45 @@ const config: Config = {
 
       /* ============================
          PREMIUM INSTITUTIONAL COLORS
-         (Paxos / Coinbase Prime tier)
+         (Tether Gold tier)
       ============================ */
       colors: {
         /* ---- Base Backgrounds ---- */
-        background: "#FFFFFF",          // pure white
-        surface: "#F8FAFC",             // very light gray (slate-50)
-        "surface-elevated": "#F1F5F9",  // light gray (slate-100)
-        "surface-hover": "#E2E8F0",     // slate-200
+        background: "#0c0c0c",          // dark grey almost black
+        surface: "#111111",             // slightly lighter card bg
+        "surface-elevated": "#1a1a1a",  // hover states
+        "surface-hover": "#222222",     
 
         /* ---- Borders ---- */
-        border: "#E2E8F0",              // slate-200
-        "border-strong": "#CBD5E1",     // slate-300
-        "border-subtle": "#F1F5F9",     // slate-100
+        border: "#262626",              
+        "border-strong": "#404040",     
+        "border-subtle": "#171717",     
 
         /* ---- Text ---- */
-        "primary-text": "#0F172A",      // slate-900
-        "secondary-text": "#475569",    // slate-600
-        "muted-text": "#94A3B8",        // slate-400
+        "primary-text": "#fdfdfd",      // white text
+        "secondary-text": "#a3a3a3",    // muted grey text
+        "muted-text": "#737373",        
 
-        /* ---- Primary Accent (Simple / Clean) ---- */
-        primary: "#0F172A",             // slate-900 (high contrast)
-        "primary-strong": "#020617",    // almost black
-        "primary-muted": "#94A3B8",     // slate-400
+        /* ---- Primary Accent (Silver) ---- */
+        primary: "#e2e8f0",             // m2m silver
+        "primary-strong": "#f8fafc",    // bright silver
+        "primary-muted": "#94a3b8",     // muted silver
+        silver: "#e2e8f0",              // silver accent
 
         /* ---- Neutrals ---- */
-        secondary: "#F1F5F9",           // slate-100
-        muted: "#F8FAFC",               // slate-50
+        secondary: "#171717",           
+        muted: "#0f0f0f",               
 
         /* ---- Status (Muted, Professional) ---- */
-        success: "#16A34A",             // green-600
-        warning: "#D97706",             // amber-600
-        error: "#DC2626",               // red-600
-        info: "#475569",                // slate-600
+        success: "#16A34A",             
+        warning: "#D97706",             
+        error: "#DC2626",               
+        info: "#475569",                
 
         /* ---- Utility ---- */
-        overlay: "rgba(255,255,255,0.8)",
+        overlay: "rgba(0,0,0,0.8)",
       },
+
 
       /* ============================
          SPACING (DASHBOARD SCALE)
