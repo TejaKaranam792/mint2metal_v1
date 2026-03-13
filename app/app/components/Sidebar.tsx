@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 
 interface SidebarProps {
-  userType: 'INDIA' | 'INTERNATIONAL';
+  userType: 'INDIA_USER' | 'INTERNATIONAL_USER' | 'ADMIN' | 'API_INTEGRATOR' | null;
 }
 
 export default function Sidebar({ userType }: SidebarProps) {
@@ -13,19 +13,21 @@ export default function Sidebar({ userType }: SidebarProps) {
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: '🏠' },
-    { href: '/dashboard/buy', label: 'Buy Silver', icon: '🛒' },
+    { href: '/dashboard/trading', label: 'Buy Silver', icon: '🛒' },
     { href: '/dashboard/portfolio', label: 'Portfolio', icon: '📊' },
     { href: '/dashboard/transactions', label: 'Transactions', icon: '📋' },
-    ...(userType === 'INDIA' && user?.kyc?.status !== 'VERIFIED' ? [{ href: '/dashboard/kyc', label: 'KYC Verification', icon: '✅' }] : []),
-    ...(userType === 'INDIA' ? [{ href: '/dashboard/redemption', label: 'Redeem', icon: '🔄' }] : []),
+    ...(userType === 'INDIA_USER' && user?.kyc?.status !== 'VERIFIED' ? [{ href: '/dashboard/kyc', label: 'KYC Verification', icon: '✅' }] : []),
+    ...(userType === 'INDIA_USER' ? [{ href: '/dashboard/redemption', label: 'Redeem', icon: '🔄' }] : []),
     { href: '/dashboard/developer', label: 'Developer API', icon: '🔌' },
     { href: '/dashboard/settings', label: 'Settings', icon: '⚙️' },
   ];
 
   return (
-    <div className="w-64 bg-[#0B0F14] text-[#F9FAFB] h-full">
-      <div className="p-6">
-        <h2 className="text-xl font-bold text-[#F9FAFB]">Mint2Metal</h2>
+    <div className="w-64 bg-background border-r border-border/40 h-full flex flex-col">
+      <div className="p-8">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">
+          Mint2<span className="text-secondary-text">Metal</span>
+        </h2>
       </div>
       <nav className="px-4">
         <ul className="space-y-2">
@@ -33,12 +35,12 @@ export default function Sidebar({ userType }: SidebarProps) {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={`flex items-center px-4 py-2 rounded-lg ${pathname === item.href
-                  ? 'bg-[#111827] text-[#F9FAFB]'
-                  : 'text-[#9CA3AF] hover:bg-[#111827] hover:text-[#F9FAFB]'
+                className={`flex items-center px-4 py-3 rounded-xl text-sm font-semibold uppercase tracking-wider transition-all duration-200 ${pathname === item.href
+                  ? 'bg-accent/10 text-accent shadow-[inset_0_0_10px_rgba(56,189,248,0.05)]'
+                  : 'text-secondary-text hover:bg-surface hover:text-foreground'
                   }`}
               >
-                <span className="mr-3">{item.icon}</span>
+                <span className={`mr-3 text-lg transition-transform ${pathname === item.href ? 'scale-110' : 'grayscale opacity-70 group-hover:grayscale-0'}`}>{item.icon}</span>
                 {item.label}
               </Link>
             </li>

@@ -236,7 +236,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-3">
-                  <Link href="/dashboard/buy-silver">
+                  <Link href="/dashboard/trading">
                     <Button variant="default" size="lg" className="w-full justify-start gap-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300">
                       <span className="text-xl">💰</span>
                       <span>Buy Silver</span>
@@ -254,12 +254,14 @@ export default function Dashboard() {
                       <span>Get Loan</span>
                     </Button>
                   </Link>
-                  <Link href="/dashboard/redemption">
-                    <Button variant="outline" size="lg" className="w-full justify-start gap-3 border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/50 transition-all duration-300">
-                      <span className="text-xl">🔄</span>
-                      <span>Redeem Physical</span>
-                    </Button>
-                  </Link>
+                  {userType === "INDIA_USER" && (
+                    <Link href="/dashboard/redemption">
+                      <Button variant="outline" size="lg" className="w-full justify-start gap-3 border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/50 transition-all duration-300">
+                        <span className="text-xl">🔄</span>
+                        <span>Redeem Physical</span>
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </CardContent>
             </Card>

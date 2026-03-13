@@ -149,11 +149,11 @@ export default function DeveloperPortal({ embedded = false }: { embedded?: boole
       <div className="max-w-6xl mx-auto space-y-8 animate-reveal-up">
 
         {/* Header */}
-        <div>
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-500">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">
             Developer Portal
           </h1>
-          <p className="text-muted-foreground text-lg mt-2">
+          <p className="text-secondary-text text-lg">
             Manage your API Keys to integrate Mint2Metal into your own applications.
           </p>
         </div>
@@ -165,10 +165,10 @@ export default function DeveloperPortal({ embedded = false }: { embedded?: boole
         )}
 
         {/* Generate New Key Card */}
-        <Card className="border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-blue-500/5">
-          <CardHeader>
-            <CardTitle className="text-xl">Generate New API Key</CardTitle>
-            <CardDescription>
+        <Card className="border-border bg-elevated-surface/50 backdrop-blur-sm shadow-xl">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-2xl font-bold text-foreground">Generate New API Key</CardTitle>
+            <CardDescription className="text-secondary-text">
               Keys grant programmatic access to your account. Keep them secure.
             </CardDescription>
           </CardHeader>
@@ -201,21 +201,21 @@ export default function DeveloperPortal({ embedded = false }: { embedded?: boole
               </div>
             ) : (
               <form onSubmit={handleGenerate} className="space-y-5">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">Key Name (e.g. "Main Ecommerce Website")</label>
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-secondary-text uppercase tracking-wider">Key Name</label>
                   <input
                     type="text"
                     value={newKeyName}
                     onChange={(e) => setNewKeyName(e.target.value)}
-                    placeholder="Enter a descriptive name"
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                    placeholder="e.g. Main Ecommerce Website"
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-foreground placeholder-muted-text focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all duration-200"
                     required
                   />
                 </div>
 
                 {/* Permission Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">Permissions</label>
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-secondary-text uppercase tracking-wider">Permissions</label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {AVAILABLE_PERMISSIONS.map((perm) => {
                       const active = selectedPermissions.includes(perm.id);
@@ -224,13 +224,13 @@ export default function DeveloperPortal({ embedded = false }: { embedded?: boole
                           key={perm.id}
                           type="button"
                           onClick={() => togglePermission(perm.id)}
-                          className={`flex flex-col items-start p-3 rounded-lg border text-left transition-all ${active
-                            ? "border-purple-500 bg-purple-500/10 text-foreground"
-                            : "border-border bg-surface text-muted-foreground hover:border-purple-500/50"
+                          className={`flex flex-col items-start p-4 rounded-xl border-2 text-left transition-all duration-200 ${active
+                            ? "border-accent bg-accent/5 text-foreground shadow-[0_0_15px_rgba(56,189,248,0.1)]"
+                            : "border-border bg-surface/50 text-secondary-text hover:border-accent/40 hover:bg-surface"
                             }`}
                         >
-                          <span className="font-semibold text-sm">{perm.label}</span>
-                          <span className="text-xs mt-0.5 opacity-70">{perm.desc}</span>
+                          <span className={`font-bold text-sm ${active ? 'text-accent' : 'text-foreground'}`}>{perm.label}</span>
+                          <span className="text-xs mt-1 leading-relaxed opacity-80">{perm.desc}</span>
                         </button>
                       );
                     })}
@@ -240,7 +240,7 @@ export default function DeveloperPortal({ embedded = false }: { embedded?: boole
                 <Button
                   type="submit"
                   disabled={generating || !newKeyName.trim() || selectedPermissions.length === 0}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-semibold transition-all hover:scale-[1.01]"
+                  className="w-full bg-primary text-secondary hover:bg-primary/90 py-4 rounded-xl font-bold text-base transition-all active:scale-[0.98]"
                 >
                   {generating ? "Generating..." : "Generate Key"}
                 </Button>
@@ -274,14 +274,14 @@ export default function DeveloperPortal({ embedded = false }: { embedded?: boole
         )}
 
         {/* Documentation Highlight */}
-        <div className="mt-12 bg-surface border border-border rounded-xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h3 className="text-lg font-bold text-foreground mb-2">Need Help Integrating?</h3>
-            <p className="text-muted-foreground">
+        <div className="mt-12 bg-elevated-surface border border-border rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 shadow-inner">
+          <div className="flex-1">
+            <h3 className="text-2xl font-bold text-foreground mb-2">Need Help Integrating?</h3>
+            <p className="text-secondary-text leading-relaxed">
               Read our dedicated REST API documentation to learn how to fetch prices, create intents, and query vault status via your backend.
             </p>
           </div>
-          <Button variant="outline" className="shrink-0 border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
+          <Button variant="outline" className="shrink-0 h-12 px-8 border-accent/20 text-accent hover:bg-accent/10 hover:border-accent/40 rounded-xl transition-all font-semibold">
             View API Docs →
           </Button>
         </div>

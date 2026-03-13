@@ -61,40 +61,42 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-          Mint2Metal
-        </h1>
+        <Link href="/" className="hover:opacity-80 transition-opacity">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Mint2<span className="text-secondary-text">Metal</span>
+          </h1>
+        </Link>
 
         <OraclePricePill />
 
         <div className="flex items-center gap-6">
           <Link
-            className={`text-sm font-medium transition-colors hover:text-primary ${pathname === '/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}
+            className={`text-sm font-semibold uppercase tracking-wider transition-colors hover:text-accent ${pathname === '/dashboard' ? 'text-accent' : 'text-secondary-text'}`}
             href="/dashboard"
           >
             Overview
           </Link>
           <Link
-            className={`text-sm font-medium transition-colors hover:text-primary ${pathname === '/dashboard/developer' ? 'text-primary' : 'text-muted-foreground'}`}
+            className={`text-sm font-semibold uppercase tracking-wider transition-colors hover:text-accent ${pathname === '/dashboard/developer' ? 'text-accent' : 'text-secondary-text'}`}
             href="/dashboard/developer"
           >
             Developer
           </Link>
           <Link
-            className={`text-sm font-medium transition-colors hover:text-primary ${pathname === '/dashboard/trading' ? 'text-primary' : 'text-muted-foreground'}`}
+            className={`text-sm font-semibold uppercase tracking-wider transition-colors hover:text-accent ${pathname === '/dashboard/trading' ? 'text-accent' : 'text-secondary-text'}`}
             href="/dashboard/trading"
           >
             Trading
           </Link>
           <Link
-            className={`text-sm font-medium transition-colors hover:text-primary ${pathname === '/dashboard/loans' ? 'text-primary' : 'text-muted-foreground'}`}
+            className={`text-sm font-semibold uppercase tracking-wider transition-colors hover:text-accent ${pathname === '/dashboard/loans' ? 'text-accent' : 'text-secondary-text'}`}
             href="/dashboard/loans"
           >
             Loans
           </Link>
           {userType === "INDIA_USER" && (
             <Link
-              className={`text-sm font-medium transition-colors hover:text-primary ${pathname === '/dashboard/redemption' ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`text-sm font-semibold uppercase tracking-wider transition-colors hover:text-accent ${pathname === '/dashboard/redemption' ? 'text-accent' : 'text-secondary-text'}`}
               href="/dashboard/redemption"
             >
               Redemption
@@ -102,7 +104,7 @@ export default function Navbar() {
           )}
           {userType === "ADMIN" && (
             <Link
-              className={`text-sm font-medium transition-colors text-red-500 hover:text-red-600`}
+              className={`text-sm font-semibold uppercase tracking-wider text-error hover:opacity-80`}
               href="/admin"
             >
               Admin
